@@ -17,7 +17,9 @@ const SPIN_DEG_PER_SEC := 486.0
 const DEATH_DELAY := 0.4
 const END_MARGIN := 400.0
 const FINISH_OFFSET := 150.0
-const LEVEL_PATH := "res://levels/level_01.json"
+const LEVEL_PATH_FMT := "res://levels/level_%02d.json"
+const SAVE_PATH := "user://save.json"
+const AIR_JUMPS := 1  # havada, yeni bir dokunuşla yapılabilen ek zıplama sayısı
 
 const COL_BG_TOP := Color("0b0720")
 const COL_BG_BOTTOM := Color("2a0f4d")
@@ -31,6 +33,11 @@ const COL_PLAYER := Color("39ff88")
 
 enum State { PLAYING, DEAD, WON }
 
+var level_index := 1
+var level_count := 1
+var save_data := {"unlocked": 1, "best": {}, "total_attempts": 0}
+var air_jumps_left := AIR_JUMPS
+var best_pct := 0
 var level_name := ""
 var speed := 520.0
 var rows: Array[String] = []
@@ -51,7 +58,7 @@ var held := false
 var jump_queued := false
 var attempts := 1
 var state_time := 0.0
-var particles: Array[Dictionary] = []
+var particles: Array = []
 
 var camera: Camera2D
 var hud: Control
@@ -59,7 +66,11 @@ var hud: Control
 
 func _ready() -> void:
 	camera = $Camera
-	_load_level()
+	while FileAccess.file_exists(LEVEL_PATH_FMT % (level_count + 1)):
+		level_count += 1
+	_load_save()
+	level_index = clampi(int(save_data["unlocked"]), 1, level_count)
+	_load_level(level_index)
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Control.new()
@@ -70,13 +81,16 @@ func _ready() -> void:
 	_reset_run()
 
 
-func _load_level() -> void:
+func _load_level(index: int) -> void:
+	level_index = index
+	attempts = 1
+	best_pct = int(save_data["best"].get(str(index), 0))
 	var data = null
-	var file := FileAccess.open(LEVEL_PATH, FileAccess.READ)
+	var file := FileAccess.open(LEVEL_PATH_FMT % index, FileAccess.READ)
 	if file:
 		data = JSON.parse_string(file.get_as_text())
 	if typeof(data) != TYPE_DICTIONARY:
-		push_error("Seviye okunamadı: " + LEVEL_PATH)
+		push_error("Seviye okunamadı: " + (LEVEL_PATH_FMT % index))
 		data = {"name": "?", "speed": 520, "rows": ["."]}
 	level_name = str(data.get("name", ""))
 	speed = float(data.get("speed", 520))
@@ -113,6 +127,7 @@ func _reset_run() -> void:
 	vy = 0.0
 	rot = 0.0
 	on_ground = true
+	air_jumps_left = AIR_JUMPS
 	jump_queued = held
 	particles.clear()
 	_update_camera()
@@ -133,7 +148,8 @@ func _set_held(pressed: bool) -> void:
 	if pressed:
 		jump_queued = true
 		if state == State.WON and state_time > 0.8:
-			attempts = 1
+			var next := level_index + 1
+			_load_level(next if next <= level_count else 1)
 			_reset_run()
 
 
@@ -142,6 +158,7 @@ func _physics_process(delta: float) -> void:
 	match state:
 		State.PLAYING:
 			_step_player(delta)
+			_step_particles(delta)
 		State.DEAD:
 			_step_particles(delta)
 			if state_time >= DEATH_DELAY:
@@ -158,6 +175,11 @@ func _step_player(dt: float) -> void:
 	if on_ground and (held or jump_queued):
 		vy = JUMP_V
 		on_ground = false
+	elif not on_ground and jump_queued and air_jumps_left > 0:
+		# Havada ikinci dokunuş: yeni bir zıplama. Basılı tutmak havada zıplatmaz.
+		vy = JUMP_V
+		air_jumps_left -= 1
+		_spawn_air_ring()
 	jump_queued = false
 	if not on_ground:
 		vy += GRAVITY * dt
@@ -188,16 +210,22 @@ func _step_player(dt: float) -> void:
 			_land()
 	elif not _has_support():
 		on_ground = false  # bloğun kenarından düştü
+		air_jumps_left = AIR_JUMPS
 
 	if px >= level_end_x:
 		state = State.WON
 		state_time = 0.0
 		held = false
+		best_pct = 100
+		save_data["best"][str(level_index)] = 100
+		save_data["unlocked"] = maxi(int(save_data["unlocked"]), mini(level_index + 1, level_count))
+		_write_save()
 
 
 func _land() -> void:
 	vy = 0.0
 	on_ground = true
+	air_jumps_left = AIR_JUMPS
 	rot = roundf(rot / (PI * 0.5)) * (PI * 0.5)
 
 
@@ -215,6 +243,12 @@ func _has_support() -> bool:
 func _die() -> void:
 	state = State.DEAD
 	state_time = 0.0
+	var pct := int(clampf(px / level_end_x, 0.0, 1.0) * 100.0)
+	save_data["total_attempts"] = int(save_data["total_attempts"]) + 1
+	if pct > best_pct:
+		best_pct = pct
+		save_data["best"][str(level_index)] = pct
+	_write_save()
 	var origin := Vector2(px, py - PLAYER_SIZE * 0.5)
 	for i in 28:
 		var ang := randf() * TAU
@@ -226,10 +260,26 @@ func _die() -> void:
 		})
 
 
+func _spawn_air_ring() -> void:
+	# Havada zıplama geri bildirimi: oyuncunun altından saçılan kısa parçacıklar.
+	var origin := Vector2(px, py)
+	for i in 8:
+		var ang := PI * 0.15 + randf() * PI * 0.7
+		particles.append({
+			"pos": origin,
+			"vel": Vector2(cos(ang) * -1.0, sin(ang)) * randf_range(120.0, 320.0),
+			"size": randf_range(3.0, 7.0),
+			"ttl": 0.3,
+		})
+
+
 func _step_particles(dt: float) -> void:
 	for p in particles:
 		p["vel"].y += GRAVITY * 0.4 * dt
 		p["pos"] += p["vel"] * dt
+		if p.has("ttl"):
+			p["ttl"] -= dt
+	particles = particles.filter(func(p): return not p.has("ttl") or p["ttl"] > 0.0)
 
 
 func _update_camera() -> void:
@@ -275,11 +325,10 @@ func _draw() -> void:
 		draw_rect(Rect2(fx + 16.0, GROUND_Y - (i + 1) * 32.0, 16.0, 32.0), Color.BLACK if i % 2 == 0 else Color.WHITE)
 
 	# Oyuncu / parçacıklar
-	if state == State.DEAD:
-		for p in particles:
-			var s: float = p["size"]
-			draw_rect(Rect2(p["pos"] - Vector2(s, s) * 0.5, Vector2(s, s)), COL_PLAYER)
-	else:
+	for p in particles:
+		var s: float = p["size"]
+		draw_rect(Rect2(p["pos"] - Vector2(s, s) * 0.5, Vector2(s, s)), COL_PLAYER)
+	if state != State.DEAD:
 		_draw_player()
 
 
@@ -327,8 +376,34 @@ func _draw_hud() -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
 	hud.draw_string(font, Vector2(20.0, 38.0), "Deneme %d" % attempts,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
+	hud.draw_string(font, Vector2(20.0, 68.0), "Seviye %d/%d  •  En iyi %%%d" % [level_index, level_count, best_pct],
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 18, COL_NEON)
 	if state == State.WON:
 		hud.draw_string(font, Vector2(0.0, size.y * 0.42), "SEVİYE TAMAM",
 			HORIZONTAL_ALIGNMENT_CENTER, size.x, 72, COL_PLAYER)
-		hud.draw_string(font, Vector2(0.0, size.y * 0.42 + 50.0), "Tekrar oynamak için dokun",
+		var hint := "Sonraki seviye için dokun" if level_index < level_count else "Tüm seviyeler tamam! Baştan oynamak için dokun"
+		hud.draw_string(font, Vector2(0.0, size.y * 0.42 + 50.0), hint,
 			HORIZONTAL_ALIGNMENT_CENTER, size.x, 24, Color.WHITE)
+
+
+# ---------------------------------------------------------------- kayıt
+
+func _load_save() -> void:
+	# İlerleme cihazda (user://) saklanır; web sürümünde tarayıcı deposuna yazılır.
+	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if not file:
+		return
+	var data = JSON.parse_string(file.get_as_text())
+	if typeof(data) != TYPE_DICTIONARY:
+		return
+	save_data["unlocked"] = clampi(int(data.get("unlocked", 1)), 1, level_count)
+	save_data["total_attempts"] = int(data.get("total_attempts", 0))
+	var best = data.get("best", {})
+	if typeof(best) == TYPE_DICTIONARY:
+		save_data["best"] = best
+
+
+func _write_save() -> void:
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(save_data))

@@ -12,8 +12,13 @@
 - `scenes/game.tscn`: `Node2D` (game.gd) + `Camera2D "Camera"`. Geri kalan her şey (HUD CanvasLayer dahil) koddan kurulur.
 - `scripts/game.gd`: seviye yükleme, sabit adımlı fizik (`_physics_process`), AABB çarpışma, çizim, HUD, durum makinesi (PLAYING / DEAD / WON).
 - `levels/*.json`: `{name, speed, rows}`; `.` boş, `#` blok, `^` diken; son satır zemin seviyesi. Tile (c,r) → x=c·64, y=560−(satır−r)·64.
-- `tools/gen_level_01.py`: seviyeyi üretir ve game.gd ile aynı fizik sabitleriyle simüle edip **geçilebilirliği doğrular** (fizik sabitleri değişirse yeniden çalıştırılmalı).
+- `tools/gen_levels.py`: 6 seviyeyi üretir (hız 520 → 650, boşluklar daralır, segmentler zorlaşır) ve game.gd ile aynı fizik sabitleriyle simüle edip **geçilebilirliği doğrular** (fizik sabitleri değişirse yeniden çalıştırılmalı).
 - Determinizm: sabit dt, rastgelelik yalnızca görsel parçacıklarda.
+
+### Oynanış eklemeleri
+- **Çift zıplama:** havada yeni bir dokunuş bir ek zıplama verir (her inişte 1 hak). Basılı tutmak havada zıplatmaz.
+- **Kademeli zorluk:** `levels/level_01..06.json`, bitirince sonraki seviye açılır.
+- **Yerel kayıt:** `user://save.json` (açılan seviye, seviye başına en iyi %, toplam deneme). Hesap/bulut girişi yok; bunun için sunucu (ör. Play Games / Game Center veya Supabase/Firebase) gerekir ve yol haritasındadır.
 
 ### Fizik özeti
 T=64, GROUND_Y=560, g=4200, zıplama hızı −1100 (yaklaşık 4,25 tile menzil, 2,25 tile yükseklik), oyuncu 56x56, kamera oyuncunun 300 px önünde. Blok: üstten iniş (vy≥0 ve önceki alt kenar bloğun üstünün 12 px içinde) aksi halde ölüm. Diken: 0,55 genişlik / alt %60 yükseklik hitbox.
