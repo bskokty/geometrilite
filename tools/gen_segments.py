@@ -49,10 +49,13 @@ WEIGHTS = [None, (4, 2, 0), (3, 3, 0), (2, 3, 1), (2, 3, 2), (1, 3, 2), (1, 3, 3
 COUNTS = [0, 10, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22]
 TALL = [0, 0, 0, 0, 0, 2, 2, 3, 3, 4, 4, 4]
 # Giriş seviyesi: yavaş, tek zıplamayla kolay, geniş boşluklu; sabit dizilim.
+# Yalnızca zamanlama toleransı >= EASY_MS olan parçalar (tek diken, 1 yüksek bloklar, aralıklı diken çifti).
 LEVEL1_FIXED = [
-    (["^"], 9), (["^"], 9), (["##"], 9), (["^^"], 9), (["###"], 9),
-    (["^....^"], 9), (["##", "##"], 9), (["^"], 9), (["^^"], 7),
+    (["^"], 9), (["^"], 9), (["##"], 9), (["^....^"], 9), (["###"], 9),
+    (["^"], 9), (["^......^"], 9), (["##"], 9), (["^"], 7),
 ]
+EASY_MS = 230      # bu toleransın üstü "kolay"
+MEDIUM_MS = 150    # bu toleransın üstü "orta", altı "zor"
 MAX_PER_TIER = 12
 
 
@@ -174,6 +177,51 @@ def seg_ok(seg, speed, air):
     return solvable(assemble([(seg, 10)]), speed, air)
 
 
+def solvable_from(world, state):
+    """Verilen durumdan seviyenin sonuna kadar (mükemmel oyunla) hayatta kalınabilir mi?"""
+    end_f = int((world.width_px + 400) / (world.speed * DT)) + 1
+    layer = {(round(state[1]), round(state[2] / 8), state[3], state[4]): state}
+    for _ in range(end_f - state[0]):
+        nxt = {}
+        for s in layer.values():
+            for press in ((False, True) if (s[3] or s[4] != 0) else (False,)):
+                n = world.step(s, press)
+                if n is not None:
+                    nxt[(round(n[1]), round(n[2] / 8), n[3], n[4])] = n
+        if not nxt:
+            return False
+        layer = nxt
+    return True
+
+
+def window_ms(seg, speed):
+    """İlk engeli geçmek için zıplama zamanlamasının toleransı (ms), havada zıplama olmadan.
+
+    Zemindeki küp bir kare kalkış yaparsa ve ilk engelin önünde değil ötesinde inip
+    (sonrasında mükemmel oyunla) segmenti bitirebiliyorsa o kalkış anı "geçerli" sayılır.
+    Çok erken zıplayıp engelden önce inmek sayılmaz. Değer ne kadar büyükse segment o kadar
+    bağışlayıcıdır; 0 = tek zıplamayla başlanamaz/geçilemez.
+    """
+    rows = assemble([(seg, 8)])
+    world = World(rows, speed, 0)
+    cols = [c for c in range(len(rows[0])) if any(rows[r][c] in "#^v" for r in range(ROWS))]
+    xl, xr = min(cols) * T, (max(cols) + 1) * T
+    ok = 0
+    for f in range(max(0, int((xl - 450) / (speed * DT))), int(xr / (speed * DT)) + 1):
+        s = (f, float(GROUND_Y), 0.0, True, 0)
+        s = world.step(s, True)
+        while s is not None and not s[3]:
+            s = world.step(s, False)
+        if s is None:
+            continue
+        landing_x = speed * DT * s[0]
+        if s[1] >= GROUND_Y - 1 and landing_x < xl - 10:
+            continue  # engelden önce yere indi: zorluğu temsil etmez
+        if solvable_from(world, s):
+            ok += 1
+    return ok * 1000.0 / 60.0
+
+
 def ceiling_variants(base, rng, n):
     """Taban segmente tavan engeli ekler (üstten ROWS satır)."""
     w = max(len(s) for s in base)
@@ -203,25 +251,30 @@ def tall_blocks():
 
 
 def pools_for(level, rng):
+    """Parçaları, o seviyenin hızındaki zamanlama toleransına göre kolay/orta/zor diye ayırır."""
     speed, air = SPEEDS[level - 1], AIR[level - 1]
-    tiers = [EASY, MEDIUM, HARD]
-    pools = [[s for s in t if seg_ok(s, speed, air)] for t in tiers]
+    cands = [s for t in (EASY, MEDIUM, HARD) for s in t]
     if level >= 4:
         base = [s for t in (EASY, MEDIUM) for s in t]
-        cand = [v for b in base for v in ceiling_variants(b, rng, 1)]
-        cand = [s for s in cand if seg_ok(s, speed, air)]
-        rng.shuffle(cand)
-        pools[1] += cand[: len(cand) // 2]
-        pools[2] += cand[len(cand) // 2:]
+        cands += [v for b in base for v in ceiling_variants(b, rng, 1)]
+    tiers = {"easy": [], "medium": [], "hard": []}
+    seen = set()
+    for seg in cands:
+        key = tuple(seg)
+        if key in seen or not seg_ok(seg, speed, air):
+            continue
+        seen.add(key)
+        ms = window_ms(seg, speed)
+        tiers["easy" if ms >= EASY_MS else "medium" if ms >= MEDIUM_MS else "hard"].append(seg)
     tall = []
     if TALL[level - 1]:
         tall = [s for s in tall_blocks() if not seg_ok(s, speed, 0) and seg_ok(s, speed, air)]
         if not tall:
             raise RuntimeError(f"seviye {level}: havada zıplama gerektiren parça yok")
     out = {}
-    for name, pool in zip(("easy", "medium", "hard"), pools):
-        rng.shuffle(pool)
-        out[name] = pool[:MAX_PER_TIER]
+    for name in ("easy", "medium", "hard"):
+        rng.shuffle(tiers[name])
+        out[name] = tiers[name][:MAX_PER_TIER]
     out["tall"] = tall
     return out
 
