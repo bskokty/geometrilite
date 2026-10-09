@@ -54,6 +54,10 @@ LEVEL1_FIXED = [
     (["^"], 9), (["^"], 9), (["##"], 9), (["^....^"], 9), (["###"], 9),
     (["^"], 9), (["^......^"], 9), (["##"], 9), (["^"], 7),
 ]
+# İlk seviyelerde yalnızca bu sade, tek hamlelik parçalar kullanılır (ilk engeline göre ölçülen tolerans
+# birleşik parçalardaki ikinci engelin zorluğunu göstermez). İki yüksek blok 4. seviyeden önce çıkmaz.
+SIMPLE = [["^"], ["##"], ["###"], ["^....^"], ["^......^"]]
+WHITELIST = {2: SIMPLE, 3: SIMPLE + [["##..##..##"], ["###...^"]]}
 EASY_MS = 230      # bu toleransın üstü "kolay"
 MEDIUM_MS = 150    # bu toleransın üstü "orta", altı "zor"
 MAX_PER_TIER = 12
@@ -279,6 +283,19 @@ def pools_for(level, rng):
     return out
 
 
+def apply_whitelist(levels):
+    """WHITELIST'teki seviyelerde havuzu sade parçalarla sınırlar, ağırlıkları yalnızca kolaya çevirir."""
+    for lv, allowed in WHITELIST.items():
+        prof = levels[lv - 1]
+        everything = [seg for tier in ("easy", "medium", "hard") for seg in prof["pools"].get(tier, [])]
+        keep = [seg for seg in everything if seg in allowed]
+        missing = [seg for seg in allowed if seg not in keep]
+        if missing:
+            raise RuntimeError(f"seviye {lv}: sade parça havuzda yok: {missing}")
+        prof["pools"] = {"easy": keep, "medium": [], "hard": [], "tall": []}
+        prof["weights"] = [1, 0, 0]
+
+
 def profile(level):
     speed, air = SPEEDS[level - 1], AIR[level - 1]
     gap_min = -(-int(4.25 * speed / 520 * 100) // 100) + 2  # menzil + 2 kolon
@@ -312,6 +329,7 @@ def main():
     with multiprocessing.Pool(min(4, os.cpu_count() or 1)) as pool:
         results = dict(pool.imap_unordered(build_profile, range(1, PROFILE_LEVELS + 1)))
     levels = [results[i] for i in range(1, PROFILE_LEVELS + 1)]
+    apply_whitelist(levels)
     for i, prof in enumerate(levels, 1):
         sizes = {k: len(v) for k, v in prof["pools"].items()}
         print(f"seviye {i}: hız {prof['speed']}, havada zıplama {prof['air']}, boşluk {prof['gaps']}, havuz {sizes}")
