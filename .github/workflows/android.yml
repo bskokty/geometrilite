@@ -78,7 +78,7 @@ jobs:
           cd admob-src/platforms/android
           chmod +x scripts/unix/download_godot.sh gradlew
           ./scripts/unix/download_godot.sh "$GODOT_PATCH"
-          ./gradlew :src:core:assembleRelease :src:ads:assembleRelease zipPlugins \
+          ./gradlew :src:core:assembleRelease :src:core:assembleDebug :src:ads:assembleRelease :src:ads:assembleDebug zipPlugins \
             -PgodotVersion="$GODOT_PATCH" --no-daemon
           cd ../../..
           mkdir -p addons/admob/android/bin addons/admob/ios/bin
