@@ -59,4 +59,5 @@ T=64, GROUND_Y=560, g=4200, zıplama hızı −1100 (yaklaşık 4,25 tile menzil
 - **Mağaza varlıkları:** `store/` (512 ikon, 1024x500 grafik, ekran görüntüleri, `listing.md`), paket: `tools/package_store_assets.py`.
 - **Gizlilik politikası:** `docs/` (GitHub Pages ile yayınlanır; Play Console'a URL verilir).
 - **Yükleme anahtarı:** Play Uygulama İmzalama (Play App Signing) kullanılır; yükleme anahtarını (upload key) yalnızca sen saklarsın.
+- **Reklam:** Google AdMob (ödüllü: ölünce kontrol noktasından devam; geçiş reklamı: 3. seviyeden itibaren her 3 seviyede bir, en az 2 dk arayla) ve UMP onay penceresi. `scripts/ads.gd` Android dışında reklamları simüle eder. Kimlikler CI değişkenleridir; depodaki varsayılanlar Google test kimlikleridir. Adım adım kurulum: `PUBLISHING.md`.
 - **Hesap kuralları:** Yeni kişisel hesaplar üretime çıkmadan önce 12 test kullanıcısıyla 14 gün kapalı test yapmalıdır.

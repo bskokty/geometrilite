@@ -52,19 +52,30 @@ Küpün kendiliğinden koşar. Ne zaman zıplayacağına sen karar verirsin. Blo
 **Sürüm notları (1.0.0):**
 İlk sürüm. Sonsuz seviyeler, havada zıplama, tavan engelleri ve 8 dil.
 
-## Play Console form yanıtları (öneri)
+## Play Console form yanıtları (reklamlı sürüm)
 
 | Alan | Yanıt |
 |---|---|
 | Uygulama / oyun | Oyun |
-| Ücretsiz / ücretli | Ücretsiz (şimdilik reklam ve uygulama içi satın alma yok) |
+| Ücretsiz / ücretli | Ücretsiz (gelir: reklam) |
 | Kategori | Oyun → Arcade |
 | Etiketler | Arcade, Platformer, Casual |
-| İletişim e-postası | Herkese açık bir destek adresi yazın (Play Console'da zorunlu) |
-| Gizlilik politikası URL'si | `docs/privacy-policy.md` sayfasını GitHub Pages ile yayınlayın |
-| Veri güvenliği | Veri toplanmıyor, veri paylaşılmıyor. Uygulama internet izni istemez. İlerleme yalnızca cihazda saklanır. |
-| Reklamlar | "Uygulamam reklam içermiyor" (reklam eklendiğinde güncellenmeli) |
-| Hedef kitle | 13 yaş ve üzeri önerilir. Çocuklara yönelik olarak seçmeyin (Aileler politikası ek yükümlülük getirir). |
-| İçerik derecelendirmesi (IARC) | Şiddet yok (soyut şekiller), kullanıcı üretimi içerik yok, satın alma yok, konum paylaşımı yok → büyük olasılıkla 3+/Herkes |
-| Hedef API düzeyi | 36 (Android 16). Play, Ağustos 2026'dan beri yeni uygulamalar için şart koşuyor. |
-| Yeni kişisel hesap kuralı | Hesabın Kasım 2023'ten sonra açıldıysa üretime çıkmadan önce 12 test kullanıcısıyla 14 gün kapalı test gerekir. |
+| İletişim e-postası | Herkese açık bir destek adresi (zorunlu) |
+| Gizlilik politikası URL'si | `docs/` klasörünü GitHub Pages ile yayınla, adresi buraya yaz |
+| **Reklamlar** | **Evet, uygulamam reklam içeriyor** |
+| Hedef kitle | 13 yaş ve üzeri. Çocuklara yönelik seçme (Aileler politikası ve reklam kısıtları devreye girer). |
+| İçerik derecelendirmesi (IARC) | Şiddet yok (soyut şekiller), kullanıcı üretimi içerik yok, satın alma yok, konum paylaşımı yok. "Uygulamada reklam var" sorusuna evet. |
+| Hedef API düzeyi | 36 (Android 16) |
+| Uygulama imzalama | Play Uygulama İmzalama (Play App Signing) |
+
+### Veri güvenliği formu (Google Mobile Ads SDK için)
+Google'ın resmî tablosuna göre (eklenti belgesi: `docs/privacy/store_data_disclosure/google_play_data_disclosure.md`). Son kararı sen verirsin; SDK sürümü değişirse tabloyu yeniden kontrol et.
+
+| Veri türü (Play kategorisi) | Toplanıyor mu | Paylaşılıyor mu | Amaç |
+|---|---|---|---|
+| Konum → Yaklaşık konum (IP adresinden) | Evet | Evet (Google) | Reklam, analiz, sahtekârlık önleme |
+| Uygulama etkinliği → Uygulama etkileşimleri | Evet | Evet (Google) | Reklam, analiz, sahtekârlık önleme |
+| Uygulama bilgileri ve performans → Tanılama | Evet | Evet (Google) | Analiz, sahtekârlık önleme |
+| Cihaz veya diğer kimlikler (reklam kimliği, uygulama seti kimliği) | Evet | Evet (Google) | Reklam, analiz, sahtekârlık önleme |
+
+Diğer sorular: Veriler aktarımda şifrelenir: **Evet**. Kullanıcılar veri silinmesini isteyebilir: oyun hesap tutmadığı için "hayır, sunucuda kullanıcı verisi yok" (reklam kimliği Android ayarlarından sıfırlanır). Üçüncü taraf SDK (Google Mobile Ads) kullanımını belirt.
