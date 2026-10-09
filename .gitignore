@@ -3,3 +3,6 @@
 export_presets.cfg
 build/
 __pycache__/
+addons/admob/android/bin/
+addons/admob/ios/bin/
+addons/admob/downloads/

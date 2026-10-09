@@ -25,12 +25,19 @@ const WIN_END_SPEED := 0.2         # bitiş çizgisinden sonra hızın düştü�
 const FADE_TIME := 0.4
 const BANNER_TIME := 2.4
 const RESET_CONFIRM_TIME := 3.0
+const AD_MIN_REWARDED_LEVEL := 2     # ödüllü "devam et" teklifi bu seviyeden itibaren
+const AD_MIN_INTERSTITIAL_LEVEL := 3 # geçiş reklamı bu seviyeden itibaren
+const INTERSTITIAL_EVERY := 3        # ... ve her 3 seviyede bir (3, 6, 9, ...)
+const OFFER_TIME := 3.0              # "reklam izle" teklifinin ekranda kalma süresi
+const OFFER_MIN_PCT := 15            # teklif için gereken en az ilerleme (%)
+const CHECKPOINT_AHEAD := 6          # kontrol noktası, sonraki engelden bu kadar kutu önce
 const MAX_EXTRA_SEGMENTS := 24      # profil seviyelerinden sonra seviye başına uzama sınırı
 const SEGMENTS_PATH := "res://levels/segments.json"
 const SAVE_PATH := "user://save.json"
 const LANGS := ["en", "tr", "de", "es", "fr", "pt", "it", "ru"]
 const STR := {
 	"en": {
+		"watch_ad": "WATCH AD TO CONTINUE", "privacy": "PRIVACY OPTIONS", "ad_preview": "ADVERTISEMENT (PREVIEW)",
 		"level_word": "LEVEL", "level": "LEVEL %d", "best": "Best %d%%", "complete": "LEVEL COMPLETE",
 		"start": "START", "continue": "CONTINUE", "reset": "RESET GAME",
 		"reset_confirm": "TAP AGAIN TO ERASE PROGRESS", "left_off": "WHERE YOU LEFT OFF", "new_game": "NEW GAME",
@@ -38,6 +45,7 @@ const STR := {
 		"air_hint": "Tap again while airborne",
 	},
 	"tr": {
+		"watch_ad": "REKLAM İZLE, DEVAM ET", "privacy": "GİZLİLİK SEÇENEKLERİ", "ad_preview": "REKLAM (ÖNİZLEME)",
 		"level_word": "SEVİYE", "level": "SEVİYE %d", "best": "En iyi %%%d", "complete": "SEVİYE TAMAMLANDI",
 		"start": "BAŞLA", "continue": "DEVAM ET", "reset": "OYUNU SIFIRLA",
 		"reset_confirm": "SİLMEK İÇİN TEKRAR DOKUN", "left_off": "KALDIĞIN YER", "new_game": "YENİ OYUN",
@@ -45,6 +53,7 @@ const STR := {
 		"air_hint": "Havadayken tekrar dokun",
 	},
 	"de": {
+		"watch_ad": "WERBUNG ANSEHEN & WEITER", "privacy": "DATENSCHUTZOPTIONEN", "ad_preview": "WERBUNG (VORSCHAU)",
 		"level_word": "LEVEL", "level": "LEVEL %d", "best": "Bestwert %d%%", "complete": "LEVEL GESCHAFFT",
 		"start": "START", "continue": "WEITER", "reset": "SPIEL ZURÜCKSETZEN",
 		"reset_confirm": "ZUM LÖSCHEN ERNEUT TIPPEN", "left_off": "DEIN LETZTER STAND", "new_game": "NEUES SPIEL",
@@ -52,6 +61,7 @@ const STR := {
 		"air_hint": "In der Luft erneut tippen",
 	},
 	"es": {
+		"watch_ad": "VER ANUNCIO Y CONTINUAR", "privacy": "OPCIONES DE PRIVACIDAD", "ad_preview": "ANUNCIO (VISTA PREVIA)",
 		"level_word": "NIVEL", "level": "NIVEL %d", "best": "Mejor %d%%", "complete": "NIVEL COMPLETADO",
 		"start": "JUGAR", "continue": "CONTINUAR", "reset": "REINICIAR JUEGO",
 		"reset_confirm": "TOCA DE NUEVO PARA BORRAR", "left_off": "DONDE LO DEJASTE", "new_game": "NUEVA PARTIDA",
@@ -59,6 +69,7 @@ const STR := {
 		"air_hint": "Toca de nuevo en el aire",
 	},
 	"fr": {
+		"watch_ad": "VOIR UNE PUB ET CONTINUER", "privacy": "OPTIONS DE CONFIDENTIALITÉ", "ad_preview": "PUBLICITÉ (APERÇU)",
 		"level_word": "NIVEAU", "level": "NIVEAU %d", "best": "Meilleur %d%%", "complete": "NIVEAU TERMINÉ",
 		"start": "JOUER", "continue": "CONTINUER", "reset": "RÉINITIALISER",
 		"reset_confirm": "TOUCHEZ À NOUVEAU POUR EFFACER", "left_off": "OÙ VOUS EN ÉTIEZ", "new_game": "NOUVELLE PARTIE",
@@ -66,6 +77,7 @@ const STR := {
 		"air_hint": "Touchez à nouveau en l'air",
 	},
 	"pt": {
+		"watch_ad": "VER ANÚNCIO E CONTINUAR", "privacy": "OPÇÕES DE PRIVACIDADE", "ad_preview": "ANÚNCIO (PRÉVIA)",
 		"level_word": "NÍVEL", "level": "NÍVEL %d", "best": "Melhor %d%%", "complete": "NÍVEL CONCLUÍDO",
 		"start": "JOGAR", "continue": "CONTINUAR", "reset": "REINICIAR JOGO",
 		"reset_confirm": "TOQUE NOVAMENTE PARA APAGAR", "left_off": "ONDE VOCÊ PAROU", "new_game": "NOVO JOGO",
@@ -73,6 +85,7 @@ const STR := {
 		"air_hint": "Toque novamente no ar",
 	},
 	"it": {
+		"watch_ad": "GUARDA UN ANNUNCIO E CONTINUA", "privacy": "OPZIONI PRIVACY", "ad_preview": "ANNUNCIO (ANTEPRIMA)",
 		"level_word": "LIVELLO", "level": "LIVELLO %d", "best": "Migliore %d%%", "complete": "LIVELLO COMPLETATO",
 		"start": "GIOCA", "continue": "CONTINUA", "reset": "RIPRISTINA GIOCO",
 		"reset_confirm": "TOCCA ANCORA PER CANCELLARE", "left_off": "DOVE ERI RIMASTO", "new_game": "NUOVA PARTITA",
@@ -80,6 +93,7 @@ const STR := {
 		"air_hint": "Tocca di nuovo in aria",
 	},
 	"ru": {
+		"watch_ad": "СМОТРЕТЬ РЕКЛАМУ И ПРОДОЛЖИТЬ", "privacy": "НАСТРОЙКИ КОНФИДЕНЦИАЛЬНОСТИ", "ad_preview": "РЕКЛАМА (ПРЕДПРОСМОТР)",
 		"level_word": "УРОВЕНЬ", "level": "УРОВЕНЬ %d", "best": "Рекорд %d%%", "complete": "УРОВЕНЬ ПРОЙДЕН",
 		"start": "ИГРАТЬ", "continue": "ПРОДОЛЖИТЬ", "reset": "СБРОСИТЬ ИГРУ",
 		"reset_confirm": "НАЖМИТЕ ЕЩЁ РАЗ, ЧТОБЫ СТЕРЕТЬ", "left_off": "ГДЕ ВЫ ОСТАНОВИЛИСЬ", "new_game": "НОВАЯ ИГРА",
@@ -118,6 +132,13 @@ var has_ceiling := false
 var ceil_y := 0.0
 var banner_t := 0.0
 var reset_armed_t := 0.0
+var ads: Node
+var checkpoints: Array[float] = []   # boş zemin aralıklarında güvenli yeniden başlama noktaları (x)
+var offer_active := false            # ölünce "reklam izle, devam et" teklifi açık mı
+var ad_pending := false              # teklif edilen ödüllü reklam sürüyor
+var reward_earned := false
+var resume_x := 0.0
+var next_pending := false            # seviye sonu (geçiş reklamı dahil) akışı başladı mı
 var fade := 0.0                     # seviye geçişi kararma (0 = görünür, 1 = siyah)
 var speed := 520.0
 var rows: Array[String] = []
@@ -155,6 +176,8 @@ func _ready() -> void:
 	f_num = _make_font(FONT_DISPLAY, 700)
 	f_ui = _make_font(FONT_UI, 500)
 	f_ui_b = _make_font(FONT_UI, 700)
+	ads = preload("res://scripts/ads.gd").new()
+	add_child(ads)
 	_load_segments()
 	_load_save()
 	lang = str(save_data.get("lang", ""))
@@ -290,6 +313,7 @@ func _load_level(n: int) -> void:
 	for line in rows:
 		level_w = maxi(level_w, line.length())
 	level_end_x = level_w * T + END_MARGIN
+	_compute_checkpoints()
 	solid_tiles.clear()
 	spike_tiles.clear()
 	spike_hitboxes.clear()
@@ -315,6 +339,35 @@ func _load_level(n: int) -> void:
 				ceil_spike_hitboxes.append(Rect2(rect.position.x + (T - sw) * 0.5, rect.position.y, sw, sh))
 
 
+func _compute_checkpoints() -> void:
+	## Engel olmayan boş kolon dizilerinde, sonraki engelden CHECKPOINT_AHEAD kutu önce bir nokta işaretler.
+	## Küp orada zeminde, durağan başlar; sonraki engele tepki vermek için yeterli yol vardır.
+	checkpoints.clear()
+	var run_start := -1
+	for c in range(level_w + 1):
+		var empty := c < level_w
+		if empty:
+			for r in row_count:
+				if c < rows[r].length() and rows[r][c] != ".":
+					empty = false
+					break
+		if empty:
+			if run_start < 0:
+				run_start = c
+		elif run_start >= 0:
+			if run_start > 0 and c < level_w and c - run_start >= 5:
+				checkpoints.append(float(maxi(run_start + 1, c - CHECKPOINT_AHEAD)) * T)
+			run_start = -1
+
+
+func _last_checkpoint_before(x: float) -> float:
+	var best := -1.0
+	for cp in checkpoints:
+		if cp <= x - CHECKPOINT_AHEAD * T:
+			best = cp
+	return best
+
+
 # ---------------------------------------------------------------- durum geçişleri
 
 func _reset_run(new_state: State = State.PLAYING) -> void:
@@ -327,6 +380,10 @@ func _reset_run(new_state: State = State.PLAYING) -> void:
 	on_ground = true
 	air_left = air_jumps_cfg
 	jump_queued = false
+	offer_active = false
+	ad_pending = false
+	reward_earned = false
+	next_pending = false
 	particles.clear()
 	_update_camera()
 	queue_redraw()
@@ -344,7 +401,39 @@ func _start_game() -> void:
 	banner_t = BANNER_TIME if new_ability else 0.0
 
 
+func _interstitial_due() -> bool:
+	return level_index >= AD_MIN_INTERSTITIAL_LEVEL and level_index % INTERSTITIAL_EVERY == 0 \
+		and ads.can_show_interstitial()
+
+
+func _watch_ad_to_continue() -> void:
+	offer_active = false
+	ad_pending = true
+	reward_earned = false
+	ads.show_rewarded(Callable(self, "_on_ad_reward"), Callable(self, "_on_ad_closed"))
+
+
+func _on_ad_reward() -> void:
+	reward_earned = true
+
+
+func _on_ad_closed() -> void:
+	ad_pending = false
+	if reward_earned and state == State.DEAD:
+		_resume_from(resume_x)
+	elif state == State.DEAD:
+		_reset_run()
+
+
+func _resume_from(x: float) -> void:
+	_reset_run()
+	px = x
+	banner_t = 0.0
+	_update_camera()
+
+
 func _next_level() -> void:
+	next_pending = false
 	_load_level(level_index + 1)
 	_reset_run()
 	banner_t = BANNER_TIME if new_ability else 0.0
@@ -381,10 +470,29 @@ func _menu_rect() -> Rect2:
 	return Rect2(hud.size.x - 64.0, 14.0, 48.0, 40.0)
 
 
+func _offer_rect() -> Rect2:
+	return Rect2(hud.size.x * 0.5 - 230.0, hud.size.y * 0.5 - 8.0, 460.0, 64.0)
+
+
+func _privacy_rect() -> Rect2:
+	var r := _reset_rect()
+	return Rect2(r.position.x, r.end.y + 6.0, r.size.x, 30.0)
+
+
 func _input(event: InputEvent) -> void:
 	# Dokunma, emulate_mouse_from_touch ile fare olayına çevrilir; yalnızca onu dinliyoruz.
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
+			if ads.sim_active or ad_pending or ads.busy:
+				return
+			if state == State.DEAD and offer_active:
+				if _offer_rect().has_point(event.position):
+					_watch_ad_to_continue()
+				else:
+					offer_active = false   # başka yere dokunmak teklifi geçer, hemen yeniden başlar
+					_reset_run()
+					jump_queued = true
+				return
 			if state == State.MENU:
 				_menu_press(event.position)
 				return
@@ -412,6 +520,8 @@ func _menu_press(pos: Vector2) -> void:
 			_reset_progress()
 		else:
 			reset_armed_t = RESET_CONFIRM_TIME
+	elif ads.privacy_options_required and _privacy_rect().has_point(pos):
+		ads.show_privacy_options()
 	elif _lang_rect().has_point(pos):
 		lang = LANGS[(LANGS.find(lang) + 1) % LANGS.size()]
 		save_data["lang"] = lang
@@ -440,7 +550,7 @@ func _physics_process(delta: float) -> void:
 			_step_particles(delta)
 		State.DEAD:
 			_step_particles(delta)
-			if state_time >= DEATH_DELAY:
+			if not ad_pending and state_time >= (OFFER_TIME if offer_active else DEATH_DELAY):
 				_reset_run()
 				jump_queued = held
 		State.WON:
@@ -449,8 +559,12 @@ func _physics_process(delta: float) -> void:
 			var ease_out := 1.0 - (1.0 - k) * (1.0 - k)
 			px += speed * lerpf(1.0, WIN_END_SPEED, ease_out) * delta
 			fade = clampf((state_time - (WIN_DELAY - FADE_TIME)) / FADE_TIME, 0.0, 1.0)
-			if state_time >= WIN_DELAY:
-				_next_level()
+			if state_time >= WIN_DELAY and not next_pending:
+				next_pending = true
+				if _interstitial_due():
+					ads.show_interstitial(Callable(self, "_next_level"))
+				else:
+					_next_level()
 	if state != State.WON:
 		fade = maxf(0.0, fade - delta / FADE_TIME)
 	_update_camera()
@@ -546,6 +660,9 @@ func _die() -> void:
 		best_pct = pct
 		save_data["best"][str(level_index)] = pct
 	_write_save()
+	resume_x = _last_checkpoint_before(px)
+	offer_active = level_index >= AD_MIN_REWARDED_LEVEL and pct >= OFFER_MIN_PCT \
+		and resume_x > 0.0 and ads.can_show_rewarded()
 	var origin := Vector2(px, py - PLAYER_SIZE * 0.5)
 	for i in 28:
 		var ang := randf() * TAU
@@ -679,6 +796,10 @@ func _draw_hud() -> void:
 		_draw_menu()
 	else:
 		_draw_play_hud()
+	if state == State.DEAD and offer_active:
+		_draw_offer()
+	if ads.sim_active:
+		_draw_sim_ad()
 	if fade > 0.0:
 		hud.draw_rect(Rect2(Vector2.ZERO, hud.size), Color(0.02, 0.0, 0.06, fade))
 
@@ -757,6 +878,27 @@ func _draw_play_hud() -> void:
 		_spaced_center(f_title, _t("complete"), size.x * 0.5, size.y * 0.44, 40, COL_PLAYER, 3.0, true)
 
 
+func _draw_offer() -> void:
+	var size := hud.size
+	var r := _offer_rect()
+	var left := clampf(1.0 - state_time / OFFER_TIME, 0.0, 1.0)
+	hud.draw_style_box(_box(Color(COL_NEON, 0.2), COL_NEON, 3, 32, Color(COL_NEON, 0.3), 12), r)
+	_spaced_center(f_ui_b, "▶  " + _t("watch_ad"), size.x * 0.5, r.position.y + 40.0, 20, Color.WHITE, 2.0)
+	var bar := Rect2(r.position.x + 24.0, r.end.y + 12.0, (r.size.x - 48.0) * left, 4.0)
+	hud.draw_rect(bar, Color(1, 1, 1, 0.5))
+
+
+func _draw_sim_ad() -> void:
+	## Önizleme/masaüstü: gerçek reklam yokken akışı göstermek için simüle edilen reklam ekranı.
+	var size := hud.size
+	hud.draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.0, 0.06, 0.97))
+	_spaced_center(f_ui_b, _t("ad_preview"), size.x * 0.5, size.y * 0.5, 22, COL_DIM, 4.0)
+	var k := clampf(1.0 - ads.sim_t / ads.SIM_SECONDS, 0.0, 1.0)
+	var track := Rect2(size.x * 0.5 - 140.0, size.y * 0.5 + 36.0, 280.0, 6.0)
+	hud.draw_style_box(_box(Color(1, 1, 1, 0.15), Color(0, 0, 0, 0), 0, 3), track)
+	hud.draw_style_box(_box(COL_NEON, COL_NEON, 0, 3), Rect2(track.position, Vector2(maxf(track.size.x * k, 6.0), 6.0)))
+
+
 func _draw_menu() -> void:
 	var size := hud.size
 	var cx := size.x * 0.5
@@ -813,6 +955,11 @@ func _draw_menu() -> void:
 	if armed:
 		hud.draw_style_box(_box(Color(COL_SPIKE, 0.18), COL_SPIKE, 2, 19), rr)
 	_spaced_center(f_ui_b, _t("reset_confirm") if armed else _t("reset"), cx, rr.position.y + 24.0, 12, rc, 2.0)
+
+	# Gizlilik seçenekleri (yalnızca AB onay kuralı gerektiriyorsa)
+	if ads.privacy_options_required:
+		var pr := _privacy_rect()
+		_spaced_center(f_ui_b, _t("privacy"), cx, pr.position.y + 20.0, 11, Color(COL_NEON, 0.8), 2.0)
 
 	# Dil düğmesi
 	var lb := _lang_rect()

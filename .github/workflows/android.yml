@@ -2,9 +2,14 @@ name: Android AAB
 
 # Google Play'e yüklenecek Android App Bundle'ı (AAB) derler.
 # Elle çalıştır: Actions sekmesi -> "Android AAB" -> Run workflow.
-# İmzalı sürüm için depo gizli değişkenleri (Settings -> Secrets and variables -> Actions):
+#
+# İmzalı (Play'e yüklenebilir) sürüm için depo gizli değişkenleri
+# (Settings -> Secrets and variables -> Actions -> Secrets):
 #   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_ALIAS, ANDROID_KEYSTORE_PASSWORD
-# Tanımlı değilse test amaçlı debug anahtarıyla bir AAB üretilir (Play'e yüklenemez).
+# Gerçek reklamlar için depo değişkenleri (Variables sekmesi):
+#   ADMOB_APP_ID, ADMOB_REWARDED_UNIT_ID, ADMOB_INTERSTITIAL_UNIT_ID
+# Anahtar deposu tanımlı değilse test amaçlı debug anahtarıyla bir AAB üretilir (Play'e yüklenemez).
+# İmzalı sürümde AdMob değişkenleri yoksa derleme bilerek başarısız olur (test reklamlarıyla yayın önlenir).
 
 on:
   workflow_dispatch:
@@ -14,11 +19,13 @@ on:
 env:
   GODOT_VERSION: "4.7"
   GODOT_RELEASE: "4.7-stable"
+  GODOT_PATCH: "4.7.0"                 # AdMob Android eklentisi bu sürüme göre derlenir
+  ADMOB_PLUGIN_COMMIT: "c75c79f"       # addons/admob ile aynı kaynak sürümü (sabitlenmiş)
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -63,6 +70,43 @@ jobs:
           echo "${GODOT_VERSION}.stable" > android/.build_version
           touch android/build/.gdignore
 
+      - name: AdMob Android eklentisini derle (sabit kaynak sürümünden)
+        run: |
+          set -e
+          git clone https://github.com/poingstudios/godot-admob-plugin admob-src
+          git -C admob-src checkout "$ADMOB_PLUGIN_COMMIT"
+          cd admob-src/platforms/android
+          chmod +x scripts/unix/download_godot.sh gradlew
+          ./scripts/unix/download_godot.sh "$GODOT_PATCH"
+          ./gradlew :src:core:assembleRelease :src:ads:assembleRelease zipPlugins \
+            -PgodotVersion="$GODOT_PATCH" --no-daemon
+          cd ../../..
+          mkdir -p addons/admob/android/bin addons/admob/ios/bin
+          unzip -q -o "admob-src/platforms/android/.output/android-template-v${GODOT_PATCH}.zip" -d addons/admob/android/bin
+          # Eklentinin başsız kipte var olmayan dosyaları indirmeye çalışmasını engelle
+          printf 'const VERSION := "v5.2.0"\n' > addons/admob/android/bin/package.gd
+          printf 'const VERSION := "v5.2.0"\n' > addons/admob/ios/bin/package.gd
+          find addons/admob/android/bin -maxdepth 3 | head -30
+
+      - name: Reklam kimliklerini yaz
+        env:
+          APP_ID: ${{ vars.ADMOB_APP_ID }}
+          REWARDED: ${{ vars.ADMOB_REWARDED_UNIT_ID }}
+          INTERSTITIAL: ${{ vars.ADMOB_INTERSTITIAL_UNIT_ID }}
+          HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          set -e
+          if [ -n "$APP_ID" ] && [ -n "$REWARDED" ] && [ -n "$INTERSTITIAL" ]; then
+            sed -i "s#^general/android/app_id=.*#general/android/app_id=\"$APP_ID\"#" project.godot
+            printf '{"rewarded":"%s","interstitial":"%s","test":false}\n' "$REWARDED" "$INTERSTITIAL" > config/ads.json
+            echo "Gerçek AdMob kimlikleri yazıldı."
+          elif [ "$HAS_KEYSTORE" = "true" ]; then
+            echo "::error::İmzalı sürüm için ADMOB_APP_ID, ADMOB_REWARDED_UNIT_ID ve ADMOB_INTERSTITIAL_UNIT_ID depo değişkenleri tanımlı olmalı (test reklamlarıyla yayın yapılmaz)."
+            exit 1
+          else
+            echo "::warning::AdMob değişkenleri yok; Google test reklam kimlikleri kullanılıyor."
+          fi
+
       - name: Anahtar deposunu hazırla
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -99,12 +143,15 @@ jobs:
           fi
           ls -la build
 
-      - name: AAB içeriğini doğrula (ikon, hedef SDK)
+      - name: AAB içeriğini doğrula (ikon, hedef SDK, izinler)
         run: |
           set -e
+          echo "--- ikonlar"
           unzip -l build/neon-pulse.aab | grep -iE "res/.*(ic_launcher|icon)" | head -20 || true
+          echo "--- sürüm ayarları"
           grep -nE "targetSdk|compileSdk|minSdk" android/build/config.gradle || true
-          unzip -p build/neon-pulse.aab base/manifest/AndroidManifest.xml | strings | grep -iE "targetSdkVersion|uses-permission" | head || true
+          echo "--- bildirim"
+          unzip -p build/neon-pulse.aab base/manifest/AndroidManifest.xml | strings | grep -iE "targetSdkVersion|permission|APPLICATION_ID|ca-app-pub" | head -20 || true
 
       - uses: actions/upload-artifact@v4
         with:
