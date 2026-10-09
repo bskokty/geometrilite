@@ -12,11 +12,13 @@
 - `scenes/game.tscn`: `Node2D` (game.gd) + `Camera2D "Camera"`. Geri kalan her şey (HUD CanvasLayer dahil) koddan kurulur.
 - `scripts/game.gd`: seviye yükleme, sabit adımlı fizik (`_physics_process`), AABB çarpışma, çizim, HUD, durum makinesi (PLAYING / DEAD / WON).
 - `levels/*.json`: `{name, speed, rows}`; `.` boş, `#` blok, `^` diken; son satır zemin seviyesi. Tile (c,r) → x=c·64, y=560−(satır−r)·64.
-- `tools/gen_levels.py`: 6 seviyeyi üretir (hız 520 → 650, boşluklar daralır, segmentler zorlaşır) ve game.gd ile aynı fizik sabitleriyle simüle edip **geçilebilirliği doğrular** (fizik sabitleri değişirse yeniden çalıştırılmalı).
+- `tools/gen_levels.py`: 6 seviyeyi üretir (hız 520 → 650, boşluklar daralır, segmentler zorlaşır, tavan engelleri ve havada zıplama hakkı eklenir) ve game.gd ile aynı fizik sabitleriyle simüle edip **geçilebilirliği doğrular** (fizik sabitleri değişirse yeniden çalıştırılmalı).
 - Determinizm: sabit dt, rastgelelik yalnızca görsel parçacıklarda.
 
 ### Oynanış eklemeleri
-- **Çift zıplama:** havada her yeni dokunuş yeni bir zıplama verir (sınırsız, arka arkaya basarak havada kalınabilir). Basılı tutmak havada zıplatmaz, yalnızca yerde her inişte tekrar zıplatır.
+- **Havada zıplama (seviyeye bağlı):** Seviye 1-3'te yok; 4'te 1, 5'te 3, 6'da sınırsız (`air_jumps` alanı, -1 = sınırsız). Yeni dokunuş = ek zıplama; basılı tutmak havada zıplatmaz, yerde her inişte tekrar zıplatır. Yetenek açıldığında seviye afişinde duyurulur; 4+ seviyelerde yalnızca bu yetenekle geçilebilen uzun bloklar bulunur.
+- **Tavan engelleri:** 3. seviyeden itibaren tavandan sarkan dikenler (`v`) ve asılı bloklar; havada zıplama olan seviyelerde tavan çizgisi küpü sınırlar, böylece sürekli yukarıda uçmak engellenir.
+- **Dil desteği:** EN, TR, DE, ES, FR, PT, IT, RU. Cihaz diliyle başlar, sağ üstteki düğmeyle değişir ve kaydedilir (`save.json`). Metinler `STR` sözlüğündedir; yeni dil eklemek için bir sözlük girdisi yeterlidir (CJK/Arapça için uygun font gerekir).
 - **Kademeli zorluk:** `levels/level_01..06.json`, bitirince sonraki seviye açılır.
 - **Yerel kayıt:** `user://save.json` (açılan seviye, seviye başına en iyi %, toplam deneme). Hesap/bulut girişi yok; bunun için sunucu (ör. Play Games / Game Center veya Supabase/Firebase) gerekir ve yol haritasındadır.
 
