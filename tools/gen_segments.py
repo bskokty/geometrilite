@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""levels/level_NN.json dosyalarını üretir ve geçilebilirliği doğrular.
+"""Sonsuz seviye sistemi için doğrulanmış engel parçası havuzlarını üretir (levels/segments.json).
 
-Doğrulama, scripts/game.gd ile aynı sabit adımlı fiziği simüle eder
-(zıplama, havada zıplama hakkı, tavan sınırı, blok/diken çarpışması).
-Seviye bilgisi:
-  speed      px/sn
-  air_jumps  havada yapılabilen ek zıplama sayısı (0 yok, -1 sınırsız)
+Oyun (scripts/game.gd) her seviye numarasını bu havuzlardan, seviye numarasına göre
+deterministik biçimde kurar. Her parça, o seviyenin hız ve havada zıplama ayarıyla,
+önünde ve arkasında düz zemin varken tek başına geçilebilir olacak şekilde
+scripts/game.gd ile aynı sabit adımlı fizikte simüle edilerek doğrulanır.
+Parçalar arasındaki boşluk, zıplama menzilinden büyük tutulduğu için parçalar birbirinden
+bağımsız geçilebilir.
+
 Karakterler: '.' boş, '#' blok, '^' yer dikeni, 'v' tavan dikeni.
 
-Kullanım:  python3 tools/gen_levels.py
+Kullanım:  python3 tools/gen_segments.py
 """
 import json
 import os
@@ -38,22 +40,20 @@ HARD = [
     ["#...", "##.."], ["^.##.^"], [".###", "####"], ["^^.^^"], ["##^^##"],
 ]
 
-# (ad, hız, segment sayısı, boşluk aralığı, ağırlıklar (kolay, orta, zor),
-#  tohum, havada zıplama, tavan engelleri, zorunlu uzun blok sayısı)
-LEVELS = [
-    ("Awakening", 520, None, None, None, None, 0, False, 0),
-    ("Pulse Run", 545, 12, (6, 9), (3, 2, 0), 202, 0, False, 0),
-    ("Static", 570, 14, (5, 8), (2, 3, 1), 303, 0, True, 0),
-    ("Overdrive", 595, 16, (5, 7), (1, 3, 2), 404, 1, True, 2),
-    ("Voltage", 620, 18, (4, 7), (1, 2, 3), 505, 3, True, 3),
-    ("Zenith", 650, 20, (4, 6), (0, 2, 4), 606, -1, True, 4),
+PROFILE_LEVELS = 12                 # bu seviyeden sonra ayarlar sabit kalır, parça sayısı artar
+START_EMPTY = 12
+SPEEDS = [420 + 25 * i for i in range(PROFILE_LEVELS)]
+AIR = [0, 0, 0, 0, 0, 1, 1, 2, 3, -1, -1, -1]
+WEIGHTS = [None, (4, 2, 0), (3, 3, 0), (2, 3, 1), (2, 3, 2), (1, 3, 2), (1, 3, 3),
+           (1, 2, 3), (0, 2, 4), (0, 2, 5), (0, 2, 5), (0, 1, 6)]
+COUNTS = [0, 10, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22]
+TALL = [0, 0, 0, 0, 0, 2, 2, 3, 3, 4, 4, 4]
+# Giriş seviyesi: yavaş, tek zıplamayla kolay, geniş boşluklu; sabit dizilim.
+LEVEL1_FIXED = [
+    (["^"], 9), (["^"], 9), (["##"], 9), (["^^"], 9), (["###"], 9),
+    (["^....^"], 9), (["##", "##"], 9), (["^"], 9), (["^^"], 7),
 ]
-
-LEVEL1_SEGMENTS = [
-    (["^"], 8), (["^^"], 8), (["###"], 7), (["^....^"], 8), (["##", "##"], 8),
-    (["^^^"], 8), (["##..##..##"], 8), (["^....^....^^"], 5),
-]
-START_EMPTY = 14
+MAX_PER_TIER = 12
 
 
 def assemble(parts):
@@ -174,10 +174,6 @@ def seg_ok(seg, speed, air):
     return solvable(assemble([(seg, 10)]), speed, air)
 
 
-def full(rows):
-    return [r for r in rows]
-
-
 def ceiling_variants(base, rng, n):
     """Taban segmente tavan engeli ekler (üstten ROWS satır)."""
     w = max(len(s) for s in base)
@@ -206,62 +202,71 @@ def tall_blocks():
     return out
 
 
-def build_level(name, speed, count, gaps, weights, seed, air, ceil, tall_req):
-    rng = random.Random(seed)
+def pools_for(level, rng):
+    speed, air = SPEEDS[level - 1], AIR[level - 1]
     tiers = [EASY, MEDIUM, HARD]
     pools = [[s for s in t if seg_ok(s, speed, air)] for t in tiers]
-    if ceil:
+    if level >= 4:
         base = [s for t in (EASY, MEDIUM) for s in t]
-        cand = [v for b in base for v in ceiling_variants(b, rng, 2)]
+        cand = [v for b in base for v in ceiling_variants(b, rng, 1)]
         cand = [s for s in cand if seg_ok(s, speed, air)]
         rng.shuffle(cand)
-        # Tavan engelli segmentler orta/zor havuza karışır.
         pools[1] += cand[: len(cand) // 2]
         pools[2] += cand[len(cand) // 2:]
-    required = []
-    if tall_req:
-        need = [s for s in tall_blocks() if not seg_ok(s, speed, 0) and seg_ok(s, speed, air)]
-        if not need:
-            raise RuntimeError(f"{name}: havada zıplama gerektiren segment bulunamadı")
-        required = [rng.choice(need) for _ in range(tall_req)]
-    for _ in range(100):
-        parts, prev = [], None
-        for _i in range(count):
-            tier = rng.choices(range(3), weights=weights)[0]
-            if not pools[tier]:
-                continue
-            seg = rng.choice(pools[tier])
-            if seg != prev:
-                parts.append(seg)
-                prev = seg
-        if required:
-            step = len(parts) // (len(required) + 1)
-            for k, seg in enumerate(required, 1):
-                parts.insert(k * step + k - 1, seg)
-        rows = assemble([(s, rng.randint(*gaps)) for s in parts])
-        # Boşluklar segmentleri ayırır; hava zıplama seviyelerinde segment bazlı doğrulama yeterlidir.
-        if air != 0 or solvable(rows, speed, air):
-            return rows
-    raise RuntimeError(f"{name}: geçilebilir seviye üretilemedi")
+    tall = []
+    if TALL[level - 1]:
+        tall = [s for s in tall_blocks() if not seg_ok(s, speed, 0) and seg_ok(s, speed, air)]
+        if not tall:
+            raise RuntimeError(f"seviye {level}: havada zıplama gerektiren parça yok")
+    out = {}
+    for name, pool in zip(("easy", "medium", "hard"), pools):
+        rng.shuffle(pool)
+        out[name] = pool[:MAX_PER_TIER]
+    out["tall"] = tall
+    return out
+
+
+def profile(level):
+    speed, air = SPEEDS[level - 1], AIR[level - 1]
+    gap_min = -(-int(4.25 * speed / 520 * 100) // 100) + 2  # menzil + 2 kolon
+    prof = {
+        "speed": speed, "air": air, "ceil": level >= 4,
+        "gaps": [gap_min, gap_min + 3],
+        "weights": list(WEIGHTS[level - 1] or (1, 0, 0)),
+        "count": COUNTS[level - 1], "tall": TALL[level - 1],
+    }
+    if level == 1:
+        prof["fixed"] = [[seg, gap] for seg, gap in LEVEL1_FIXED]
+    return prof
+
+
+def build_profile(level):
+    rng = random.Random(1000 + level)
+    prof = profile(level)
+    if level == 1:
+        rows = assemble(LEVEL1_FIXED)
+        if not solvable(rows, prof["speed"], 0):
+            raise RuntimeError("seviye 1 geçilemiyor")
+        prof["pools"] = {}
+    else:
+        prof["pools"] = pools_for(level, rng)
+    return level, prof
 
 
 def main():
-    out_dir = os.path.join(os.path.dirname(__file__), "..", "levels")
-    os.makedirs(out_dir, exist_ok=True)
-    for i, (name, speed, count, gaps, weights, seed, air, ceil, tall) in enumerate(LEVELS, 1):
-        if count is None:
-            rows = assemble(LEVEL1_SEGMENTS)
-            if not solvable(rows, speed, air):
-                sys.exit(f"{name} geçilemiyor")
-        else:
-            rows = build_level(name, speed, count, gaps, weights, seed, air, ceil, tall)
-        assert len({len(r) for r in rows}) == 1
-        path = os.path.join(out_dir, f"level_{i:02d}.json")
-        with open(path, "w", encoding="utf-8") as fh:
-            json.dump({"name": name, "speed": speed, "air_jumps": air, "rows": rows},
-                      fh, ensure_ascii=False, indent=1)
-            fh.write("\n")
-        print(f"{i}. {name}: hız {speed}, havada zıplama {air}, {len(rows[0])} kolon, doğrulandı")
+    import multiprocessing
+    out_path = os.path.join(os.path.dirname(__file__), "..", "levels", "segments.json")
+    with multiprocessing.Pool(min(4, os.cpu_count() or 1)) as pool:
+        results = dict(pool.imap_unordered(build_profile, range(1, PROFILE_LEVELS + 1)))
+    levels = [results[i] for i in range(1, PROFILE_LEVELS + 1)]
+    for i, prof in enumerate(levels, 1):
+        sizes = {k: len(v) for k, v in prof["pools"].items()}
+        print(f"seviye {i}: hız {prof['speed']}, havada zıplama {prof['air']}, boşluk {prof['gaps']}, havuz {sizes}")
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump({"version": 1, "start_empty": START_EMPTY, "profile_levels": PROFILE_LEVELS,
+                   "levels": levels}, fh, ensure_ascii=False, separators=(",", ":"))
+        fh.write("\n")
+    print("yazıldı:", os.path.normpath(out_path))
 
 
 if __name__ == "__main__":
