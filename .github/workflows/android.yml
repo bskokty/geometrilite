@@ -89,7 +89,7 @@ jobs:
       - name: İçe aktar ve AAB üret
         run: |
           set -e
-          cp ci/export_presets.cfg export_presets.cfg
+          cp ci/android_preset.cfg export_presets.cfg
           mkdir -p build
           ./godot --headless --path . --import
           if [ "$MODE" = "release" ]; then

@@ -54,7 +54,7 @@ T=64, GROUND_Y=560, g=4200, zıplama hızı −1100 (yaklaşık 4,25 tile menzil
 
 ## Google Play yayını
 - **Motor:** Android hedef API 36 gerektiği için proje Godot 4.7'ye yükseltildi (4.3 yalnızca API 34 hedefler).
-- **Derleme:** `.github/workflows/android.yml` AAB üretir (Actions sekmesinden elle çalıştırılır). `ci/export_presets.cfg` Android ayarlarını (paket adı, sürüm, ikonlar, hedef SDK 36, izin yok) içerir. Anahtar deposu bilgileri depoda tutulmaz, GitHub gizli değişkenleridir.
+- **Derleme:** `.github/workflows/android.yml` AAB üretir (Actions sekmesinden elle çalıştırılır). `ci/android_preset.cfg` Android ayarlarını (paket adı, sürüm, ikonlar, hedef SDK 36, izin yok) içerir. Anahtar deposu bilgileri depoda tutulmaz, GitHub gizli değişkenleridir.
 - **İkon:** `assets/icons/` içindeki 192 px ana ikon ve 432 px adaptif ikon katmanları (ön plan, arka plan, tek renk) AAB'ye gömülür. Görseller `tools/make_store_assets.py` ile üretilir.
 - **Mağaza varlıkları:** `store/` (512 ikon, 1024x500 grafik, ekran görüntüleri, `listing.md`), paket: `tools/package_store_assets.py`.
 - **Gizlilik politikası:** `docs/` (GitHub Pages ile yayınlanır; Play Console'a URL verilir).
