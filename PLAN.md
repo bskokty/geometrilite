@@ -16,7 +16,7 @@
 - Determinizm: sabit dt, rastgelelik yalnızca görsel parçacıklarda.
 
 ### Oynanış eklemeleri
-- **Çift zıplama:** havada yeni bir dokunuş bir ek zıplama verir (her inişte 1 hak). Basılı tutmak havada zıplatmaz.
+- **Çift zıplama:** havada her yeni dokunuş yeni bir zıplama verir (sınırsız, arka arkaya basarak havada kalınabilir). Basılı tutmak havada zıplatmaz, yalnızca yerde her inişte tekrar zıplatır.
 - **Kademeli zorluk:** `levels/level_01..06.json`, bitirince sonraki seviye açılır.
 - **Yerel kayıt:** `user://save.json` (açılan seviye, seviye başına en iyi %, toplam deneme). Hesap/bulut girişi yok; bunun için sunucu (ör. Play Games / Game Center veya Supabase/Firebase) gerekir ve yol haritasındadır.
 

@@ -19,7 +19,6 @@ const END_MARGIN := 400.0
 const FINISH_OFFSET := 150.0
 const LEVEL_PATH_FMT := "res://levels/level_%02d.json"
 const SAVE_PATH := "user://save.json"
-const AIR_JUMPS := 1  # havada, yeni bir dokunuşla yapılabilen ek zıplama sayısı
 
 const COL_BG_TOP := Color("0b0720")
 const COL_BG_BOTTOM := Color("2a0f4d")
@@ -36,7 +35,6 @@ enum State { PLAYING, DEAD, WON }
 var level_index := 1
 var level_count := 1
 var save_data := {"unlocked": 1, "best": {}, "total_attempts": 0}
-var air_jumps_left := AIR_JUMPS
 var best_pct := 0
 var level_name := ""
 var speed := 520.0
@@ -127,7 +125,6 @@ func _reset_run() -> void:
 	vy = 0.0
 	rot = 0.0
 	on_ground = true
-	air_jumps_left = AIR_JUMPS
 	jump_queued = held
 	particles.clear()
 	_update_camera()
@@ -175,10 +172,9 @@ func _step_player(dt: float) -> void:
 	if on_ground and (held or jump_queued):
 		vy = JUMP_V
 		on_ground = false
-	elif not on_ground and jump_queued and air_jumps_left > 0:
-		# Havada ikinci dokunuş: yeni bir zıplama. Basılı tutmak havada zıplatmaz.
+	elif not on_ground and jump_queued:
+		# Havada her yeni dokunuş yeni bir zıplama verir (sınırsız). Basılı tutmak havada zıplatmaz.
 		vy = JUMP_V
-		air_jumps_left -= 1
 		_spawn_air_ring()
 	jump_queued = false
 	if not on_ground:
@@ -210,8 +206,7 @@ func _step_player(dt: float) -> void:
 			_land()
 	elif not _has_support():
 		on_ground = false  # bloğun kenarından düştü
-		air_jumps_left = AIR_JUMPS
-
+	
 	if px >= level_end_x:
 		state = State.WON
 		state_time = 0.0
@@ -225,7 +220,6 @@ func _step_player(dt: float) -> void:
 func _land() -> void:
 	vy = 0.0
 	on_ground = true
-	air_jumps_left = AIR_JUMPS
 	rot = roundf(rot / (PI * 0.5)) * (PI * 0.5)
 
 
