@@ -16,7 +16,7 @@
 - Determinizm: sabit dt, rastgelelik yalnızca görsel parçacıklarda.
 
 ### Oynanış
-- **Sonsuz seviyeler:** Seviye sayısı sınırsızdır. Her seviye numarası, `levels/segments.json` içindeki doğrulanmış engel parçalarından numaraya bağlı tohumla kurulur (aynı numara hep aynı seviyeyi verir). İlk 12 seviyede hız 420 → 695 px/sn artar, parça havuzu zorlaşır; 12'den sonra hız sabit kalır, seviye uzar (en fazla +24 parça). Bitirince bir sonraki seviye otomatik başlar.
+- **Sonsuz seviyeler:** Seviye sayısı sınırsızdır. Her seviye numarası, `levels/segments.json` içindeki doğrulanmış engel parçalarından numaraya bağlı tohumla kurulur (aynı numara hep aynı seviyeyi verir). İlk 12 seviyede hız 420 → 695 px/sn artar, parça havuzu zorlaşır; 12'den sonra hız sabit kalır, seviye uzar (en fazla +24 parça). Bitirince küp durmaz: bitiş çizgisinden sonra yavaşlayarak koşmaya devam eder, kısa bir kararmayla bir sonraki seviye otomatik başlar.
 - **Giriş seviyesi** bilinçli olarak yavaş ve basittir (sabit dizilim, geniş boşluklar).
 - **Havada zıplama (seviyeye bağlı):** Seviye 1-5'te yok; 6-7'de 1, 8'de 2, 9'da 3, 10 ve sonrasında sınırsız. Yeni dokunuş = ek zıplama; basılı tutmak havada zıplatmaz, yerde her inişte tekrar zıplatır. Yetenek açıldığı seviyenin başında kısa bir duyuru çıkar; 6+ seviyelerde yalnızca bu yetenekle geçilebilen uzun bloklar bulunur.
 - **Tavan engelleri:** 4. seviyeden itibaren tavandan sarkan dikenler ve asılı bloklar; havada zıplama olan seviyelerde tavan çizgisi küpü sınırlar.

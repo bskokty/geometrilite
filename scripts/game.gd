@@ -20,7 +20,9 @@ const SPIN_DEG_PER_SEC := 486.0
 const DEATH_DELAY := 0.4
 const END_MARGIN := 400.0
 const FINISH_OFFSET := 150.0
-const WIN_DELAY := 1.4
+const WIN_DELAY := 2.2             # seviye bitince küp bu süre boyunca yavaşlayarak koşmaya devam eder
+const WIN_END_SPEED := 0.2         # bitiş çizgisinden sonra hızın düştüğü son oran
+const FADE_TIME := 0.4
 const BANNER_TIME := 2.4
 const RESET_CONFIRM_TIME := 3.0
 const MAX_EXTRA_SEGMENTS := 24      # profil seviyelerinden sonra seviye başına uzama sınırı
@@ -116,6 +118,7 @@ var has_ceiling := false
 var ceil_y := 0.0
 var banner_t := 0.0
 var reset_armed_t := 0.0
+var fade := 0.0                     # seviye geçişi kararma (0 = görünür, 1 = siyah)
 var speed := 520.0
 var rows: Array[String] = []
 var row_count := 0
@@ -422,8 +425,6 @@ func _set_held(pressed: bool) -> void:
 	held = pressed
 	if pressed:
 		jump_queued = true
-		if state == State.WON and state_time > 0.4:
-			_next_level()
 
 
 # ---------------------------------------------------------------- fizik
@@ -443,8 +444,15 @@ func _physics_process(delta: float) -> void:
 				_reset_run()
 				jump_queued = held
 		State.WON:
+			# Küp durmaz: bitiş çizgisinden sonra yumuşakça yavaşlayarak koşmaya devam eder.
+			var k := clampf(state_time / WIN_DELAY, 0.0, 1.0)
+			var ease_out := 1.0 - (1.0 - k) * (1.0 - k)
+			px += speed * lerpf(1.0, WIN_END_SPEED, ease_out) * delta
+			fade = clampf((state_time - (WIN_DELAY - FADE_TIME)) / FADE_TIME, 0.0, 1.0)
 			if state_time >= WIN_DELAY:
 				_next_level()
+	if state != State.WON:
+		fade = maxf(0.0, fade - delta / FADE_TIME)
 	_update_camera()
 	queue_redraw()
 	hud.queue_redraw()
@@ -671,6 +679,8 @@ func _draw_hud() -> void:
 		_draw_menu()
 	else:
 		_draw_play_hud()
+	if fade > 0.0:
+		hud.draw_rect(Rect2(Vector2.ZERO, hud.size), Color(0.02, 0.0, 0.06, fade))
 
 
 func _box(bg: Color, border: Color, bw: int, radius: int, glow: Color = Color(0, 0, 0, 0), glow_size: int = 0) -> StyleBoxFlat:
