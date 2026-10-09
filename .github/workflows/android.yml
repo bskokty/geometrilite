@@ -13,6 +13,11 @@ name: Android AAB
 
 on:
   workflow_dispatch:
+    inputs:
+      allow_test_ads:
+        description: "İmzalı derlemede gerçek AdMob kimlikleri yoksa Google test reklamlarıyla derle (yalnızca kapalı test için)"
+        type: boolean
+        default: false
   push:
     tags: ["v*"]
 
@@ -105,12 +110,15 @@ jobs:
           REWARDED: ${{ vars.ADMOB_REWARDED_UNIT_ID }}
           INTERSTITIAL: ${{ vars.ADMOB_INTERSTITIAL_UNIT_ID }}
           HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+          ALLOW_TEST_ADS: ${{ inputs.allow_test_ads }}
         run: |
           set -e
           if [ -n "$APP_ID" ] && [ -n "$REWARDED" ] && [ -n "$INTERSTITIAL" ]; then
             sed -i "s#^general/android/app_id=.*#general/android/app_id=\"$APP_ID\"#" project.godot
             printf '{"rewarded":"%s","interstitial":"%s","test":false}\n' "$REWARDED" "$INTERSTITIAL" > config/ads.json
             echo "Gerçek AdMob kimlikleri yazıldı."
+          elif [ "$ALLOW_TEST_ADS" = "true" ]; then
+            echo "::warning::Gerçek AdMob kimlikleri yok; Google test reklamlarıyla derleniyor. Kapalı test için uygundur; üretimden önce kimlikleri ekleyip yeniden derle."
           elif [ "$HAS_KEYSTORE" = "true" ]; then
             echo "::error::İmzalı sürüm için ADMOB_APP_ID, ADMOB_REWARDED_UNIT_ID ve ADMOB_INTERSTITIAL_UNIT_ID depo değişkenleri tanımlı olmalı (test reklamlarıyla yayın yapılmaz)."
             exit 1
@@ -169,3 +177,8 @@ jobs:
           name: neon-pulse-aab-${{ env.MODE }}
           path: build/neon-pulse.aab
           if-no-files-found: error
+
+      - name: İmza sertifikasını göster
+        run: |
+          echo "--- AAB imzası (debug olmamalı)"
+          keytool -printcert -jarfile build/neon-pulse.aab | grep -E "Owner|SHA256|Valid" || true
