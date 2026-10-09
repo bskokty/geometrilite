@@ -29,56 +29,56 @@ const SAVE_PATH := "user://save.json"
 const LANGS := ["en", "tr", "de", "es", "fr", "pt", "it", "ru"]
 const STR := {
 	"en": {
-		"level": "LEVEL %d", "best": "Best %d%%", "complete": "LEVEL COMPLETE",
+		"level_word": "LEVEL", "level": "LEVEL %d", "best": "Best %d%%", "complete": "LEVEL COMPLETE",
 		"start": "START", "continue": "CONTINUE", "reset": "RESET GAME",
 		"reset_confirm": "TAP AGAIN TO ERASE PROGRESS", "left_off": "WHERE YOU LEFT OFF", "new_game": "NEW GAME",
 		"new_ability": "NEW ABILITY", "air_n": "Air jump ×%d", "air_inf": "Unlimited air jumps",
 		"air_hint": "Tap again while airborne",
 	},
 	"tr": {
-		"level": "SEVİYE %d", "best": "En iyi %%%d", "complete": "SEVİYE TAMAMLANDI",
+		"level_word": "SEVİYE", "level": "SEVİYE %d", "best": "En iyi %%%d", "complete": "SEVİYE TAMAMLANDI",
 		"start": "BAŞLA", "continue": "DEVAM ET", "reset": "OYUNU SIFIRLA",
 		"reset_confirm": "SİLMEK İÇİN TEKRAR DOKUN", "left_off": "KALDIĞIN YER", "new_game": "YENİ OYUN",
 		"new_ability": "YENİ YETENEK", "air_n": "Havada zıplama ×%d", "air_inf": "Sınırsız havada zıplama",
 		"air_hint": "Havadayken tekrar dokun",
 	},
 	"de": {
-		"level": "LEVEL %d", "best": "Bestwert %d%%", "complete": "LEVEL GESCHAFFT",
+		"level_word": "LEVEL", "level": "LEVEL %d", "best": "Bestwert %d%%", "complete": "LEVEL GESCHAFFT",
 		"start": "START", "continue": "WEITER", "reset": "SPIEL ZURÜCKSETZEN",
 		"reset_confirm": "ZUM LÖSCHEN ERNEUT TIPPEN", "left_off": "DEIN LETZTER STAND", "new_game": "NEUES SPIEL",
 		"new_ability": "NEUE FÄHIGKEIT", "air_n": "Luftsprung ×%d", "air_inf": "Unbegrenzte Luftsprünge",
 		"air_hint": "In der Luft erneut tippen",
 	},
 	"es": {
-		"level": "NIVEL %d", "best": "Mejor %d%%", "complete": "NIVEL COMPLETADO",
+		"level_word": "NIVEL", "level": "NIVEL %d", "best": "Mejor %d%%", "complete": "NIVEL COMPLETADO",
 		"start": "JUGAR", "continue": "CONTINUAR", "reset": "REINICIAR JUEGO",
 		"reset_confirm": "TOCA DE NUEVO PARA BORRAR", "left_off": "DONDE LO DEJASTE", "new_game": "NUEVA PARTIDA",
 		"new_ability": "NUEVA HABILIDAD", "air_n": "Salto aéreo ×%d", "air_inf": "Saltos aéreos ilimitados",
 		"air_hint": "Toca de nuevo en el aire",
 	},
 	"fr": {
-		"level": "NIVEAU %d", "best": "Meilleur %d%%", "complete": "NIVEAU TERMINÉ",
+		"level_word": "NIVEAU", "level": "NIVEAU %d", "best": "Meilleur %d%%", "complete": "NIVEAU TERMINÉ",
 		"start": "JOUER", "continue": "CONTINUER", "reset": "RÉINITIALISER",
 		"reset_confirm": "TOUCHEZ À NOUVEAU POUR EFFACER", "left_off": "OÙ VOUS EN ÉTIEZ", "new_game": "NOUVELLE PARTIE",
 		"new_ability": "NOUVELLE CAPACITÉ", "air_n": "Saut aérien ×%d", "air_inf": "Sauts aériens illimités",
 		"air_hint": "Touchez à nouveau en l'air",
 	},
 	"pt": {
-		"level": "NÍVEL %d", "best": "Melhor %d%%", "complete": "NÍVEL CONCLUÍDO",
+		"level_word": "NÍVEL", "level": "NÍVEL %d", "best": "Melhor %d%%", "complete": "NÍVEL CONCLUÍDO",
 		"start": "JOGAR", "continue": "CONTINUAR", "reset": "REINICIAR JOGO",
 		"reset_confirm": "TOQUE NOVAMENTE PARA APAGAR", "left_off": "ONDE VOCÊ PAROU", "new_game": "NOVO JOGO",
 		"new_ability": "NOVA HABILIDADE", "air_n": "Salto aéreo ×%d", "air_inf": "Saltos aéreos ilimitados",
 		"air_hint": "Toque novamente no ar",
 	},
 	"it": {
-		"level": "LIVELLO %d", "best": "Migliore %d%%", "complete": "LIVELLO COMPLETATO",
+		"level_word": "LIVELLO", "level": "LIVELLO %d", "best": "Migliore %d%%", "complete": "LIVELLO COMPLETATO",
 		"start": "GIOCA", "continue": "CONTINUA", "reset": "RIPRISTINA GIOCO",
 		"reset_confirm": "TOCCA ANCORA PER CANCELLARE", "left_off": "DOVE ERI RIMASTO", "new_game": "NUOVA PARTITA",
 		"new_ability": "NUOVA ABILITÀ", "air_n": "Salto in aria ×%d", "air_inf": "Salti in aria illimitati",
 		"air_hint": "Tocca di nuovo in aria",
 	},
 	"ru": {
-		"level": "УРОВЕНЬ %d", "best": "Рекорд %d%%", "complete": "УРОВЕНЬ ПРОЙДЕН",
+		"level_word": "УРОВЕНЬ", "level": "УРОВЕНЬ %d", "best": "Рекорд %d%%", "complete": "УРОВЕНЬ ПРОЙДЕН",
 		"start": "ИГРАТЬ", "continue": "ПРОДОЛЖИТЬ", "reset": "СБРОСИТЬ ИГРУ",
 		"reset_confirm": "НАЖМИТЕ ЕЩЁ РАЗ, ЧТОБЫ СТЕРЕТЬ", "left_off": "ГДЕ ВЫ ОСТАНОВИЛИСЬ", "new_game": "НОВАЯ ИГРА",
 		"new_ability": "НОВАЯ СПОСОБНОСТЬ", "air_n": "Прыжок в воздухе ×%d", "air_inf": "Неограниченные прыжки в воздухе",
@@ -96,6 +96,10 @@ const COL_BLOCK_EDGE := Color("ff2bd6")
 const COL_SPIKE := Color("ff3860")
 const COL_PLAYER := Color("39ff88")
 const COL_CEIL := Color(0.03, 0.01, 0.09, 0.94)
+const COL_DIM := Color(0.72, 0.68, 0.9, 0.75)
+const FONT_UI := "res://assets/fonts/Rubik.ttf"            # çok dilli metinler (Latin, Latin-ext, Kiril)
+const FONT_DISPLAY := "res://assets/fonts/Orbitron.ttf"    # başlık ve rakamlar (yalnızca Latin)
+const WGHT_TAG := 0x77676874                                # OpenType 'wght' ekseni
 
 enum State { MENU, PLAYING, DEAD, WON }
 
@@ -136,10 +140,18 @@ var particles: Array = []
 
 var camera: Camera2D
 var hud: Control
+var f_title: Font
+var f_num: Font
+var f_ui: Font
+var f_ui_b: Font
 
 
 func _ready() -> void:
 	camera = $Camera
+	f_title = _make_font(FONT_DISPLAY, 900)
+	f_num = _make_font(FONT_DISPLAY, 700)
+	f_ui = _make_font(FONT_UI, 500)
+	f_ui_b = _make_font(FONT_UI, 700)
 	_load_segments()
 	_load_save()
 	lang = str(save_data.get("lang", ""))
@@ -154,6 +166,16 @@ func _ready() -> void:
 	hud.draw.connect(_draw_hud)
 	layer.add_child(hud)
 	_enter_menu()
+
+
+func _make_font(path: String, weight: int) -> Font:
+	var base = load(path)
+	if base == null:
+		return ThemeDB.fallback_font
+	var fv := FontVariation.new()
+	fv.base_font = base
+	fv.variation_opentype = {WGHT_TAG: weight}
+	return fv
 
 
 func _t(key: String) -> String:
@@ -334,14 +356,18 @@ func _reset_progress() -> void:
 
 # ---------------------------------------------------------------- girdi
 
+func _card_rect() -> Rect2:
+	return Rect2(hud.size.x * 0.5 - 190.0, hud.size.y * 0.2555, 380.0, 232.0)
+
+
 func _start_rect() -> Rect2:
-	var s := hud.size
-	return Rect2(s.x * 0.5 - 170.0, s.y * 0.55, 340.0, 64.0)
+	var c := _card_rect()
+	return Rect2(hud.size.x * 0.5 - 150.0, c.end.y + 26.0, 300.0, 60.0)
 
 
 func _reset_rect() -> Rect2:
 	var r := _start_rect()
-	return Rect2(r.position.x, r.end.y + 20.0, r.size.x, 46.0)
+	return Rect2(r.position.x, r.end.y + 14.0, r.size.x, 38.0)
 
 
 func _lang_rect() -> Rect2:
@@ -647,20 +673,60 @@ func _draw_hud() -> void:
 		_draw_play_hud()
 
 
+func _box(bg: Color, border: Color, bw: int, radius: int, glow: Color = Color(0, 0, 0, 0), glow_size: int = 0) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(bw)
+	sb.set_corner_radius_all(radius)
+	sb.anti_aliasing = true
+	if glow_size > 0:
+		sb.shadow_color = glow
+		sb.shadow_size = glow_size
+	return sb
+
+
+func _spaced_width(font: Font, text: String, fsize: int, spacing: float) -> float:
+	var w := 0.0
+	for ch in text:
+		w += font.get_string_size(ch, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize).x + spacing
+	return maxf(w - spacing, 0.0)
+
+
+func _spaced(font: Font, text: String, left_x: float, base_y: float, fsize: int, color: Color,
+		spacing: float, glow: bool = false) -> void:
+	## Harf aralıklı metin (büyük harfli etiketler ve başlıklar için); glow ile neon parıltısı.
+	if glow:
+		for pass_cfg in [[16, 0.07], [9, 0.12], [4, 0.2]]:
+			var gx := left_x
+			for ch in text:
+				hud.draw_string_outline(font, Vector2(gx, base_y), ch, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize,
+					int(pass_cfg[0]), Color(color, float(pass_cfg[1])))
+				gx += font.get_string_size(ch, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize).x + spacing
+	var x := left_x
+	for ch in text:
+		hud.draw_string(font, Vector2(x, base_y), ch, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize, color)
+		x += font.get_string_size(ch, HORIZONTAL_ALIGNMENT_LEFT, -1, fsize).x + spacing
+
+
+func _spaced_center(font: Font, text: String, cx: float, base_y: float, fsize: int, color: Color,
+		spacing: float, glow: bool = false) -> void:
+	_spaced(font, text, cx - _spaced_width(font, text, fsize, spacing) * 0.5, base_y, fsize, color, spacing, glow)
+
+
 func _draw_play_hud() -> void:
 	# Oyun içinde yalnızca üç bilgi: seviye numarası, ilerleme çubuğu, yüzde.
 	var size := hud.size
-	var font := ThemeDB.fallback_font
 	var progress := 1.0 if state == State.WON else clampf(px / level_end_x, 0.0, 1.0)
 	var bar_w := minf(size.x * 0.5, 560.0)
 	var bar := Rect2((size.x - bar_w) * 0.5, 24.0, bar_w, 14.0)
-	hud.draw_rect(bar, Color(0, 0, 0, 0.5))
-	hud.draw_rect(Rect2(bar.position, Vector2(bar.size.x * progress, bar.size.y)), COL_NEON)
-	hud.draw_rect(bar, COL_NEON, false, 2.0)
-	hud.draw_string(font, Vector2(bar.end.x + 12.0, 38.0), "%d%%" % int(progress * 100.0),
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
-	hud.draw_string(font, Vector2(20.0, 38.0), _t("level") % level_index,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, COL_NEON)
+	hud.draw_style_box(_box(Color(0, 0, 0, 0.55), Color(COL_NEON, 0.5), 1, 7), bar)
+	if progress > 0.0:
+		var fill := Rect2(bar.position, Vector2(maxf(bar.size.x * progress, 14.0), bar.size.y))
+		hud.draw_style_box(_box(COL_NEON, COL_NEON, 0, 7, Color(COL_NEON, 0.35), 8), fill)
+	hud.draw_string(f_num, Vector2(bar.end.x + 14.0, 39.0), "%d%%" % int(progress * 100.0),
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE)
+	_spaced(f_ui_b, _t("level") % level_index, 20.0, 38.0, 22, COL_NEON, 1.5)
 
 	# Ana ekrana dönüş düğmesi (üç çizgi)
 	var mb := _menu_rect()
@@ -671,59 +737,77 @@ func _draw_play_hud() -> void:
 	if banner_t > 0.0 and new_ability and state == State.PLAYING:
 		var a := clampf(banner_t / 0.6, 0.0, 1.0)
 		var y := size.y * 0.32
-		hud.draw_string(font, Vector2(0.0, y), "%s: %s" % [_t("new_ability"), _air_label()],
-			HORIZONTAL_ALIGNMENT_CENTER, size.x, 28, Color(COL_BLOCK_EDGE, a))
-		hud.draw_string(font, Vector2(0.0, y + 32.0), _t("air_hint"),
-			HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, Color(1, 1, 1, 0.8 * a))
+		_spaced_center(f_ui_b, _t("new_ability"), size.x * 0.5, y, 16, Color(COL_BLOCK_EDGE, a), 4.0)
+		hud.draw_string(f_ui_b, Vector2(0.0, y + 40.0), _air_label(),
+			HORIZONTAL_ALIGNMENT_CENTER, size.x, 30, Color(1, 1, 1, a))
+		hud.draw_string(f_ui, Vector2(0.0, y + 70.0), _t("air_hint"),
+			HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, Color(COL_DIM, a))
 
 	if state == State.WON:
-		hud.draw_string(font, Vector2(0.0, size.y * 0.42), _t("complete"),
-			HORIZONTAL_ALIGNMENT_CENTER, size.x, 56, COL_PLAYER)
+		_spaced_center(f_title, _t("complete"), size.x * 0.5, size.y * 0.44, 40, COL_PLAYER, 3.0, true)
 
 
 func _draw_menu() -> void:
 	var size := hud.size
-	var font := ThemeDB.fallback_font
+	var cx := size.x * 0.5
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 420.0)
+	# Arka planı biraz karart: metin okunurluğu için
+	hud.draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.0, 0.08, 0.5))
+
 	# Başlık
-	var fs := 64
-	var w1 := font.get_string_size("NEON ", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var w2 := font.get_string_size("PULSE", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var x0 := (size.x - w1 - w2) * 0.5
-	var ty := size.y * 0.20
-	hud.draw_string(font, Vector2(x0, ty), "NEON ", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, COL_NEON)
-	hud.draw_string(font, Vector2(x0 + w1, ty), "PULSE", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, COL_BLOCK_EDGE)
+	var fs := 72
+	var sp := 9.0
+	var w_neon := _spaced_width(f_title, "NEON", fs, sp)
+	var w_pulse := _spaced_width(f_title, "PULSE", fs, sp)
+	var gap := 26.0
+	var x0 := cx - (w_neon + gap + w_pulse) * 0.5
+	var ty := size.y * 0.165
+	_spaced(f_title, "NEON", x0, ty, fs, COL_NEON, sp, true)
+	_spaced(f_title, "PULSE", x0 + w_neon + gap, ty, fs, COL_BLOCK_EDGE, sp, true)
+	# Başlık altı ince ışık çizgisi
+	var ly := ty + 22.0
+	for i in 24:
+		var t0 := float(i) / 24.0
+		var al := sin(t0 * PI) * 0.8
+		hud.draw_line(Vector2(cx - 220.0 + t0 * 440.0, ly), Vector2(cx - 220.0 + (t0 + 1.0 / 24.0) * 440.0, ly),
+			Color(COL_NEON.lerp(COL_BLOCK_EDGE, t0), al), 2.0)
 
-	# Kaldığın seviye
+	# Kaldığın seviye kartı
+	var card := _card_rect()
 	var fresh := level_index == 1 and int(save_data["total_attempts"]) == 0 and best_pct == 0
-	hud.draw_string(font, Vector2(0.0, size.y * 0.33), _t("new_game") if fresh else _t("left_off"),
-		HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color(1, 1, 1, 0.65))
-	hud.draw_string(font, Vector2(0.0, size.y * 0.33 + 76.0), _t("level") % level_index,
-		HORIZONTAL_ALIGNMENT_CENTER, size.x, 72, Color.WHITE)
+	hud.draw_style_box(_box(Color(0.05, 0.02, 0.15, 0.78), Color(COL_NEON, 0.45), 2, 20,
+		Color(COL_NEON, 0.12), 18), card)
+	_spaced_center(f_ui_b, _t("new_game") if fresh else _t("left_off"), cx, card.position.y + 36.0, 14, COL_DIM, 3.0)
+	_spaced_center(f_ui_b, _t("level_word"), cx, card.position.y + 78.0, 20, COL_NEON, 7.0)
+	hud.draw_string(f_title, Vector2(card.position.x, card.position.y + 154.0), str(level_index),
+		HORIZONTAL_ALIGNMENT_CENTER, card.size.x, 76, Color.WHITE)
 	if best_pct > 0:
-		hud.draw_string(font, Vector2(0.0, size.y * 0.33 + 112.0), _t("best") % best_pct,
-			HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, COL_NEON)
+		var bw := 200.0
+		var by := card.position.y + 188.0
+		var track := Rect2(cx - bw * 0.5, by, bw, 6.0)
+		hud.draw_style_box(_box(Color(1, 1, 1, 0.12), Color(0, 0, 0, 0), 0, 3), track)
+		hud.draw_style_box(_box(COL_PLAYER, COL_PLAYER, 0, 3), Rect2(track.position, Vector2(maxf(bw * best_pct / 100.0, 6.0), 6.0)))
+		hud.draw_string(f_ui, Vector2(0.0, by + 24.0), _t("best") % best_pct,
+			HORIZONTAL_ALIGNMENT_CENTER, size.x, 14, COL_DIM)
 
-	# Düğmeler
+	# Başla / Devam Et
 	var sr := _start_rect()
-	hud.draw_rect(sr, Color(COL_NEON, 0.18))
-	hud.draw_rect(sr, COL_NEON, false, 3.0)
-	hud.draw_string(font, Vector2(sr.position.x, sr.position.y + 43.0), _t("start") if fresh else _t("continue"),
-		HORIZONTAL_ALIGNMENT_CENTER, sr.size.x, 30, COL_NEON)
+	hud.draw_style_box(_box(Color(COL_NEON, 0.16 + 0.06 * pulse), COL_NEON, 3, 30,
+		Color(COL_NEON, 0.22 + 0.2 * pulse), 12 + int(6 * pulse)), sr)
+	_spaced_center(f_ui_b, _t("start") if fresh else _t("continue"), cx, sr.position.y + 39.0, 24, Color.WHITE, 5.0)
+
+	# Oyunu sıfırla (ikincil, hayalet düğme)
 	var rr := _reset_rect()
 	var armed := reset_armed_t > 0.0
-	var rc := COL_SPIKE if armed else Color(1, 1, 1, 0.45)
+	var rc := COL_SPIKE if armed else Color(COL_DIM, 0.8)
 	if armed:
-		hud.draw_rect(rr, Color(COL_SPIKE, 0.2))
-	hud.draw_rect(rr, rc, false, 2.0)
-	hud.draw_string(font, Vector2(rr.position.x, rr.position.y + 30.0), _t("reset_confirm") if armed else _t("reset"),
-		HORIZONTAL_ALIGNMENT_CENTER, rr.size.x, 16, rc)
+		hud.draw_style_box(_box(Color(COL_SPIKE, 0.18), COL_SPIKE, 2, 19), rr)
+	_spaced_center(f_ui_b, _t("reset_confirm") if armed else _t("reset"), cx, rr.position.y + 24.0, 12, rc, 2.0)
 
 	# Dil düğmesi
 	var lb := _lang_rect()
-	hud.draw_rect(lb, Color(0, 0, 0, 0.45))
-	hud.draw_rect(lb, COL_NEON, false, 2.0)
-	hud.draw_string(font, Vector2(lb.position.x, lb.position.y + 24.0), lang.to_upper(),
-		HORIZONTAL_ALIGNMENT_CENTER, lb.size.x, 18, COL_NEON)
+	hud.draw_style_box(_box(Color(0, 0, 0, 0.4), Color(COL_NEON, 0.6), 2, 17), lb)
+	_spaced_center(f_ui_b, lang.to_upper(), lb.get_center().x, lb.position.y + 23.0, 15, COL_NEON, 2.0)
 
 
 func _air_label() -> String:
