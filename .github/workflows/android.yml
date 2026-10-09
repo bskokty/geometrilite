@@ -1,0 +1,113 @@
+name: Android AAB
+
+# Google Play'e yüklenecek Android App Bundle'ı (AAB) derler.
+# Elle çalıştır: Actions sekmesi -> "Android AAB" -> Run workflow.
+# İmzalı sürüm için depo gizli değişkenleri (Settings -> Secrets and variables -> Actions):
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_ALIAS, ANDROID_KEYSTORE_PASSWORD
+# Tanımlı değilse test amaçlı debug anahtarıyla bir AAB üretilir (Play'e yüklenemez).
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+env:
+  GODOT_VERSION: "4.7"
+  GODOT_RELEASE: "4.7-stable"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 platforms;android-36 build-tools;35.0.1 build-tools;36.0.0 cmake;3.10.2.4988404 ndk;28.1.13356709"
+
+      - name: Godot ve dışa aktarma şablonlarını indir
+        run: |
+          set -e
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}"
+          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"
+          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_RELEASE}_export_templates.tpz"
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_RELEASE}_linux.x86_64" godot && chmod +x godot
+          tdir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$tdir" tpl && unzip -q templates.tpz -d tpl
+          cp -r tpl/templates/* "$tdir/"
+
+      - name: Godot düzenleyici ayarları (SDK ve JDK yolları)
+        run: |
+          set -e
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.7.tres" <<EOF2
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "${ANDROID_HOME}"
+          export/android/java_sdk_path = "${JAVA_HOME}"
+          EOF2
+
+      - name: Android derleme şablonunu kur
+        run: |
+          set -e
+          mkdir -p android/build
+          unzip -q "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip" -d android/build
+          echo "${GODOT_VERSION}.stable" > android/.build_version
+          touch android/build/.gdignore
+
+      - name: Anahtar deposunu hazırla
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -e
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "MODE=release" >> "$GITHUB_ENV"
+            echo "GODOT_ANDROID_KEYSTORE_RELEASE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+            echo "GODOT_ANDROID_KEYSTORE_RELEASE_USER=$KS_ALIAS" >> "$GITHUB_ENV"
+            echo "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=$KS_PASS" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Anahtar deposu gizli değişkenleri yok; test amaçlı debug anahtarıyla derleniyor (Play'e yüklenemez)."
+            keytool -genkeypair -v -keystore "$RUNNER_TEMP/debug.keystore" -storepass android -keypass android \
+              -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            echo "MODE=debug" >> "$GITHUB_ENV"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$RUNNER_TEMP/debug.keystore" >> "$GITHUB_ENV"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
+            echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
+          fi
+
+      - name: İçe aktar ve AAB üret
+        run: |
+          set -e
+          cp ci/export_presets.cfg export_presets.cfg
+          mkdir -p build
+          ./godot --headless --path . --import
+          if [ "$MODE" = "release" ]; then
+            ./godot --headless --path . --export-release "Android" build/neon-pulse.aab
+          else
+            ./godot --headless --path . --export-debug "Android" build/neon-pulse.aab
+          fi
+          ls -la build
+
+      - name: AAB içeriğini doğrula (ikon, hedef SDK)
+        run: |
+          set -e
+          unzip -l build/neon-pulse.aab | grep -iE "res/.*(ic_launcher|icon)" | head -20 || true
+          grep -nE "targetSdk|compileSdk|minSdk" android/build/config.gradle || true
+          unzip -p build/neon-pulse.aab base/manifest/AndroidManifest.xml | strings | grep -iE "targetSdkVersion|uses-permission" | head || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neon-pulse-aab-${{ env.MODE }}
+          path: build/neon-pulse.aab
+          if-no-files-found: error

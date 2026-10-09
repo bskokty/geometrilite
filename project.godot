@@ -1,12 +1,12 @@
-; Neon Pulse - Godot 4.3 projesi
+; Neon Pulse - Godot 4.7 projesi
 config_version=5
 
 [application]
 
 config/name="Neon Pulse"
 run/main_scene="res://scenes/game.tscn"
-config/features=PackedStringArray("4.3", "Mobile")
-config/icon=""
+config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://assets/icons/icon-256.png"
 
 [display]
 

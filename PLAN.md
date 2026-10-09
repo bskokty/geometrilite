@@ -3,7 +3,7 @@
 Özgün bir mobil ritim-platform oyunu. Geometry Dash'in adı, ikonları, müzikleri ve görsel varlıkları kullanılmaz; görsel dil (neon/sentetik), seviyeler ve müzik özgündür.
 
 ## Teknoloji gerekçesi
-- **Godot 4.3 (GDScript):** ücretsiz ve açık kaynak, lisans/royalty yok; Android + iOS export'u yerleşik; 2D hattı güçlü; küçük APK/IPA; `_draw()` ile vektör çizim tüm sahneyi koddan kurmayı kolaylaştırır.
+- **Godot 4.7 (GDScript):** ücretsiz ve açık kaynak, lisans/royalty yok; Android + iOS export'u yerleşik; 2D hattı güçlü; küçük APK/IPA; `_draw()` ile vektör çizim tüm sahneyi koddan kurmayı kolaylaştırır.
 - **Mobile renderer:** düşük donanımda yeterli, 2D için fazlasıyla hızlı.
 - Unity/Unreal: bu ölçek için gereksiz ağır. Flutter/Flame: ses senkronu ve fizik adımı kontrolü daha zayıf.
 
@@ -51,3 +51,12 @@ T=64, GROUND_Y=560, g=4200, zıplama hızı −1100 (yaklaşık 4,25 tile menzil
 - **Zorluk dengesi:** seviyeler simülatörle doğrulanır, ama insan oynanabilirliği (kısa pencereler, ör. üçlü diken) test edilmeli.
 - **Mağaza kabulü:** gizlilik, reklam SDK'ları, yaş derecelendirmesi.
 - **Godot mobil export'u:** imzalama (Android keystore, Apple sertifikası) ve iOS için Mac gerekliliği.
+
+## Google Play yayını
+- **Motor:** Android hedef API 36 gerektiği için proje Godot 4.7'ye yükseltildi (4.3 yalnızca API 34 hedefler).
+- **Derleme:** `.github/workflows/android.yml` AAB üretir (Actions sekmesinden elle çalıştırılır). `ci/export_presets.cfg` Android ayarlarını (paket adı, sürüm, ikonlar, hedef SDK 36, izin yok) içerir. Anahtar deposu bilgileri depoda tutulmaz, GitHub gizli değişkenleridir.
+- **İkon:** `assets/icons/` içindeki 192 px ana ikon ve 432 px adaptif ikon katmanları (ön plan, arka plan, tek renk) AAB'ye gömülür. Görseller `tools/make_store_assets.py` ile üretilir.
+- **Mağaza varlıkları:** `store/` (512 ikon, 1024x500 grafik, ekran görüntüleri, `listing.md`), paket: `tools/package_store_assets.py`.
+- **Gizlilik politikası:** `docs/` (GitHub Pages ile yayınlanır; Play Console'a URL verilir).
+- **Yükleme anahtarı:** Play Uygulama İmzalama (Play App Signing) kullanılır; yükleme anahtarını (upload key) yalnızca sen saklarsın.
+- **Hesap kuralları:** Yeni kişisel hesaplar üretime çıkmadan önce 12 test kullanıcısıyla 14 gün kapalı test yapmalıdır.
