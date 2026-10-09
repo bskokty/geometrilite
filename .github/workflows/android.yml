@@ -73,20 +73,31 @@ jobs:
       - name: AdMob Android eklentisini derle (sabit kaynak sürümünden)
         run: |
           set -e
-          git clone https://github.com/poingstudios/godot-admob-plugin admob-src
-          git -C admob-src checkout "$ADMOB_PLUGIN_COMMIT"
-          cd admob-src/platforms/android
+          # Kaynak proje klasörünün dışında tutulur (Godot ikinci bir proje sanıp taramasın).
+          src="$RUNNER_TEMP/admob-src"
+          git clone https://github.com/poingstudios/godot-admob-plugin "$src"
+          git -C "$src" checkout "$ADMOB_PLUGIN_COMMIT"
+          cd "$src/platforms/android"
           chmod +x scripts/unix/download_godot.sh gradlew
           ./scripts/unix/download_godot.sh "$GODOT_PATCH"
           ./gradlew :src:core:assemble :src:ads:assemble :src:core:copyAar zipPlugins \
             -PgodotVersion="$GODOT_PATCH" --no-daemon
-          cd ../../..
-          mkdir -p addons/admob/android/bin addons/admob/ios/bin
-          unzip -q -o "admob-src/platforms/android/.output/android-template-v${GODOT_PATCH}.zip" -d addons/admob/android/bin
+          echo "--- derlenen aar dosyaları"
+          find src/core/build/outputs src/ads/build/outputs -name "*.aar" | sort
+          echo "--- zip içeriği"
+          unzip -l ".output/android-template-v${GODOT_PATCH}.zip" | tail -30
+          cd "$GITHUB_WORKSPACE"
+          bin=addons/admob/android/bin
+          mkdir -p "$bin/ads/libs" addons/admob/ios/bin
+          unzip -q -o "$src/platforms/android/.output/android-template-v${GODOT_PATCH}.zip" -d "$bin"
+          # Eklentinin beklediği yerde her zaman hem ads hem core aar'ı bulunsun
+          cp "$src"/platforms/android/src/ads/build/outputs/aar/*.aar "$bin/ads/libs/"
+          cp "$src"/platforms/android/src/core/build/outputs/aar/*.aar "$bin/ads/libs/"
           # Eklentinin başsız kipte var olmayan dosyaları indirmeye çalışmasını engelle
-          printf 'const VERSION := "v5.2.0"\n' > addons/admob/android/bin/package.gd
+          printf 'const VERSION := "v5.2.0"\n' > "$bin/package.gd"
           printf 'const VERSION := "v5.2.0"\n' > addons/admob/ios/bin/package.gd
-          find addons/admob/android/bin -name "*.aar" -o -name "*.gd" | sort
+          echo "--- addons/admob/android/bin"
+          find "$bin" -type f | sort
 
       - name: Reklam kimliklerini yaz
         env:
