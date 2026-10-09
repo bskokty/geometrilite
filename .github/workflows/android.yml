@@ -78,7 +78,7 @@ jobs:
           cd admob-src/platforms/android
           chmod +x scripts/unix/download_godot.sh gradlew
           ./scripts/unix/download_godot.sh "$GODOT_PATCH"
-          ./gradlew :src:core:assembleRelease :src:core:assembleDebug :src:ads:assembleRelease :src:ads:assembleDebug zipPlugins \
+          ./gradlew :src:core:assemble :src:ads:assemble :src:core:copyAar zipPlugins \
             -PgodotVersion="$GODOT_PATCH" --no-daemon
           cd ../../..
           mkdir -p addons/admob/android/bin addons/admob/ios/bin
@@ -86,7 +86,7 @@ jobs:
           # Eklentinin başsız kipte var olmayan dosyaları indirmeye çalışmasını engelle
           printf 'const VERSION := "v5.2.0"\n' > addons/admob/android/bin/package.gd
           printf 'const VERSION := "v5.2.0"\n' > addons/admob/ios/bin/package.gd
-          find addons/admob/android/bin -maxdepth 3 | head -30
+          find addons/admob/android/bin -name "*.aar" -o -name "*.gd" | sort
 
       - name: Reklam kimliklerini yaz
         env:
