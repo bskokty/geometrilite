@@ -166,7 +166,7 @@ Kaynak: Google Mobile Ads SDK veri açıklaması. Son karar sana ait; SDK deği�
 | Kanal adı | `Kapali test 1` |
 | Test kullanıcıları | Yeni e-posta listesi oluştur (`Test grubu`). En az **12** Gmail adresi ekle |
 | Geri bildirim e-postası | İletişim e-postan |
-| Sürüm adı | `1.0.0 (1)` |
+| Sürüm adı | `1.0.1 (2)` |
 | AAB | `neon-pulse.aab` (imzalı, release) |
 | Play Uygulama İmzalama | Kabul et |
 
