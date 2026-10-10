@@ -17,6 +17,7 @@ FILES = [
     ("assets/icons/adaptive-monochrome.png", "1-icon/android-adaptive/monochrome-432.png"),
     ("store/graphics/feature-graphic-1024x500.png", "2-feature-graphic/feature-graphic-1024x500.png"),
     ("store/listing.md", "4-listing/listing.md"),
+    ("store/play-console-alanlar.md", "4-listing/play-console-alanlar.md"),
     ("docs/privacy-policy.md", "5-privacy/privacy-policy.md"),
     ("public/privacy/index.html", "5-privacy/privacy-policy.html"),
 ]

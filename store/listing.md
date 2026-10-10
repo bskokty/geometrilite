@@ -19,6 +19,7 @@ Your cube runs on its own. You decide when to jump. Land on blocks, clear spikes
 • New abilities unlock along the way, starting with mid-air jumps
 • Floor and ceiling hazards that keep every level fresh
 • Instant restarts, so you are back in the action in a heartbeat
+• Free to play. Optional rewarded ads let you continue from a checkpoint
 • Your progress is saved on your device. No account or sign-up needed
 • Available in English, Türkçe, Deutsch, Español, Français, Português, Italiano and Русский
 
@@ -44,6 +45,7 @@ Küpün kendiliğinden koşar. Ne zaman zıplayacağına sen karar verirsin. Blo
 • Yolda açılan yeni yetenekler, ilki havada zıplama
 • Her seviyeyi taze tutan zemin ve tavan engelleri
 • Anında yeniden başlama: kaybedince hemen tekrar dene
+• Ücretsiz oynanır. İsteğe bağlı ödüllü reklamlarla kontrol noktasından devam edebilirsin
 • İlerlemen cihazında saklanır. Hesap açmana ya da kayıt olmana gerek yok
 • English, Türkçe, Deutsch, Español, Français, Português, Italiano ve Русский dil desteği
 
