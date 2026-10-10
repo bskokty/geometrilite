@@ -61,7 +61,7 @@ Küpün kendiliğinden koşar. Ne zaman zıplayacağına sen karar verirsin. Blo
 | Kategori | Oyun → Arcade |
 | Etiketler | Arcade, Platformer, Casual |
 | İletişim e-postası | Herkese açık bir destek adresi (zorunlu) |
-| Gizlilik politikası URL'si | `docs/` klasörünü GitHub Pages ile yayınla, adresi buraya yaz |
+| Gizlilik politikası URL'si | https://geometrilite.vercel.app/privacy |
 | **Reklamlar** | **Evet, uygulamam reklam içeriyor** |
 | Hedef kitle | 13 yaş ve üzeri. Çocuklara yönelik seçme (Aileler politikası ve reklam kısıtları devreye girer). |
 | İçerik derecelendirmesi (IARC) | Şiddet yok (soyut şekiller), kullanıcı üretimi içerik yok, satın alma yok, konum paylaşımı yok. "Uygulamada reklam var" sorusuna evet. |

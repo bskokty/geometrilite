@@ -1,6 +1,6 @@
 # Neon Pulse Privacy Policy / Gizlilik Politikası
 
-_Last updated / Son güncelleme: 2026-10-09_
+_Last updated / Son güncelleme: 2026-10-10_
 
 ## English
 
@@ -25,7 +25,7 @@ Where required by law (for example in the European Economic Area and the United 
 The game is not directed at children under 13. Ads are limited to content suitable for teens.
 
 ### Contact
-[your support e-mail address]
+[https://github.com/bskokty/geometrilite/issues](https://github.com/bskokty/geometrilite/issues) (open an issue and mark it as a privacy request)
 
 ## Türkçe
 
@@ -50,4 +50,4 @@ Yasaların gerektirdiği yerlerde (örneğin Avrupa Ekonomik Alanı ve Birleşik
 Oyun 13 yaş altı çocuklara yönelik değildir. Reklamlar gençlere uygun içerikle sınırlandırılmıştır.
 
 ### İletişim
-[destek e-posta adresiniz]
+[https://github.com/bskokty/geometrilite/issues](https://github.com/bskokty/geometrilite/issues) (bir konu açıp gizlilik talebi olduğunu belirtin)

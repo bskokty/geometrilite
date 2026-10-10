@@ -57,7 +57,7 @@ T=64, GROUND_Y=560, g=4200, zıplama hızı −1100 (yaklaşık 4,25 tile menzil
 - **Derleme:** `.github/workflows/android.yml` AAB üretir (Actions sekmesinden elle çalıştırılır). `ci/android_preset.cfg` Android ayarlarını (paket adı, sürüm, ikonlar, hedef SDK 36, izin yok) içerir. Anahtar deposu bilgileri depoda tutulmaz, GitHub gizli değişkenleridir.
 - **İkon:** `assets/icons/` içindeki 192 px ana ikon ve 432 px adaptif ikon katmanları (ön plan, arka plan, tek renk) AAB'ye gömülür. Görseller `tools/make_store_assets.py` ile üretilir.
 - **Mağaza varlıkları:** `store/` (512 ikon, 1024x500 grafik, ekran görüntüleri, `listing.md`), paket: `tools/package_store_assets.py`.
-- **Gizlilik politikası:** `docs/` (GitHub Pages ile yayınlanır; Play Console'a URL verilir).
+- **Gizlilik politikası:** `public/privacy/index.html`, Vercel'de https://geometrilite.vercel.app/privacy (`vercel.json` çıktı klasörünü `public` yapar). Play Console'a bu URL verilir.
 - **Yükleme anahtarı:** Play Uygulama İmzalama (Play App Signing) kullanılır; yükleme anahtarını (upload key) yalnızca sen saklarsın.
 - **Reklam:** Google AdMob (ödüllü: ölünce kontrol noktasından devam; geçiş reklamı: 3. seviyeden itibaren her 3 seviyede bir, en az 2 dk arayla) ve UMP onay penceresi. `scripts/ads.gd` Android dışında reklamları simüle eder. Kimlikler CI değişkenleridir; depodaki varsayılanlar Google test kimlikleridir. Adım adım kurulum: `PUBLISHING.md`.
 - **Hesap kuralları:** Yeni kişisel hesaplar üretime çıkmadan önce 12 test kullanıcısıyla 14 gün kapalı test yapmalıdır.

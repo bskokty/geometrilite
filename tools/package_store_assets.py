@@ -18,6 +18,7 @@ FILES = [
     ("store/graphics/feature-graphic-1024x500.png", "2-feature-graphic/feature-graphic-1024x500.png"),
     ("store/listing.md", "4-listing/listing.md"),
     ("docs/privacy-policy.md", "5-privacy/privacy-policy.md"),
+    ("public/privacy/index.html", "5-privacy/privacy-policy.html"),
 ]
 README = """Neon Pulse - Google Play paketi
 ================================
@@ -26,7 +27,7 @@ README = """Neon Pulse - Google Play paketi
 2-feature-graphic/   1024x500 öne çıkan grafik.
 3-screenshots/       1920x1080 yatay telefon ekran görüntüleri (Play en az 2, en fazla 8 kabul eder).
 4-listing/           Başlık, kısa/tam açıklama (EN, TR) ve Play Console form önerileri.
-5-privacy/           Gizlilik politikası metni. Yayınlanmış bir URL gerekir (GitHub Pages: /docs klasörü).
+5-privacy/           Gizlilik politikası metni. Yayında: https://geometrilite.vercel.app/privacy
 """
 
 

@@ -55,10 +55,9 @@ base64 -i neonpulse-upload.jks | tr -d '\n'   # macOS
 | `ANDROID_KEYSTORE_ALIAS` | `upload` |
 | `ANDROID_KEYSTORE_PASSWORD` | anahtar deposu parolası (anahtar parolası da aynı olmalı) |
 
-## D. Gizlilik politikasını yayınla
+## D. Gizlilik politikası
 
-1. `docs/index.html` ve `docs/privacy-policy.md` içindeki `[your support e-mail address]` / `[destek e-posta adresiniz]` yerine herkese açık bir destek e-postası yaz, commit et.
-2. Depoda **Settings → Pages → Build and deployment**: Source `Deploy from a branch`, Branch `main`, klasör `/docs`. Birkaç dakika sonra adres `https://bskokty.github.io/geometrilite/` olur. Bu adres Play Console'daki gizlilik politikası URL'sidir.
+Politika Vercel sitende yayında: **https://geometrilite.vercel.app/privacy** (kaynak: `public/privacy/index.html`). Play Console'daki "Gizlilik politikası" alanına bu adresi yaz. İletişim olarak deponun Issues sayfası yazılı. İstersen `public/privacy/index.html` ve `docs/privacy-policy.md` içinde kendi e-posta adresinle değiştir.
 
 ## E. AAB'yi derle
 
