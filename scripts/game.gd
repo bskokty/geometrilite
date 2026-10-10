@@ -121,6 +121,7 @@ enum State { MENU, PLAYING, DEAD, WON }
 
 var seg_data: Dictionary = {}
 var profile_levels := 1
+var music: AudioStreamPlayer
 var save_data := {"level": 1, "best": {}, "total_attempts": 0, "lang": ""}
 var lang := "en"
 var level_index := 1
@@ -178,6 +179,7 @@ func _ready() -> void:
 	f_ui_b = _make_font(FONT_UI, 700)
 	ads = preload("res://scripts/ads.gd").new()
 	add_child(ads)
+	_start_music()
 	_load_segments()
 	_load_save()
 	lang = str(save_data.get("lang", ""))
@@ -192,6 +194,21 @@ func _ready() -> void:
 	hud.draw.connect(_draw_hud)
 	layer.add_child(hud)
 	_enter_menu()
+
+
+func _start_music() -> void:
+	## Özgün, sentezlenmiş döngü (tools/make_music.py). Tam ekran reklam sırasında susar.
+	var stream = load("res://assets/audio/loop.wav")
+	if stream == null:
+		return
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin = 0
+	stream.loop_end = int(stream.data.size() / 2)
+	music = AudioStreamPlayer.new()
+	music.stream = stream
+	music.volume_db = -9.0
+	add_child(music)
+	music.play()
 
 
 func _make_font(path: String, weight: int) -> Font:
@@ -540,6 +557,8 @@ func _set_held(pressed: bool) -> void:
 # ---------------------------------------------------------------- fizik
 
 func _physics_process(delta: float) -> void:
+	if music != null:
+		music.stream_paused = ads != null and ads.busy
 	state_time += delta
 	match state:
 		State.MENU:

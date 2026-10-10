@@ -260,7 +260,7 @@ def pools_for(level, rng):
     cands = [s for t in (EASY, MEDIUM, HARD) for s in t]
     if level >= 4:
         base = [s for t in (EASY, MEDIUM) for s in t]
-        cands += [v for b in base for v in ceiling_variants(b, rng, 1)]
+        cands += [v for b in base for v in ceiling_variants(b, rng, 1) if clearance_ok(v)]
     tiers = {"easy": [], "medium": [], "hard": []}
     seen = set()
     for seg in cands:
@@ -281,6 +281,58 @@ def pools_for(level, rng):
         out[name] = tiers[name][:MAX_PER_TIER]
     out["tall"] = tall
     return out
+
+
+MIN_WINDOW_MS = 100   # bundan dar zamanlama toleranslı (insan için fazla keskin) parça kullanılmaz
+MIN_CLEARANCE = 2 * T   # tavan engeli ile yakınındaki zemin engeli arasında en az 2 kutu boşluk (küp 56 px)
+
+
+def _rows6(seg):
+    w = max(len(r) for r in seg)
+    return ["." * w] * (ROWS - len(seg)) + [r.ljust(w, ".") for r in seg]
+
+
+def clearance_ok(seg):
+    """Tavandan sarkan bir engelin altından geçilecek dikey boşluk, insanlar için yeterli mi?
+
+    Simülatör mikro zamanlamayla dar boşlukları 'geçilebilir' sayabilir; bu süzgeç, tavan engeli ile
+    aynı veya komşu kolondaki zemin engeli arasında en az MIN_CLEARANCE piksel boşluk ister.
+    """
+    rows = _rows6(seg)
+    w = len(rows[0])
+    ceil_bottom, floor_top = {}, {}
+    for c in range(w):
+        k = 0
+        while k < ROWS and rows[k][c] == "#":
+            k += 1
+        if k:
+            ceil_bottom[c] = CEIL_Y + k * T
+        for r in range(ROWS):
+            ch = rows[r][c]
+            if ch == "v":
+                ceil_bottom[c] = min(ceil_bottom.get(c, 1e9), CEIL_Y + r * T + T * SPIKE_H) if c in ceil_bottom else CEIL_Y + r * T + T * SPIKE_H
+            elif ch == "^":
+                floor_top[c] = min(floor_top.get(c, 1e9), CEIL_Y + (r + 1) * T - T * SPIKE_H)
+            elif ch == "#" and r >= k:
+                floor_top[c] = min(floor_top.get(c, 1e9), CEIL_Y + r * T)
+    for c, yb in ceil_bottom.items():
+        for dc in (-1, 0, 1):
+            yt = floor_top.get(c + dc)
+            if yt is not None and yt - yb < MIN_CLEARANCE:
+                return False
+    return True
+
+
+def drop_unfair(levels):
+    """Havuzlardan, dikey boşluğu insanlar için fazla dar olan parçaları çıkarır."""
+    removed = 0
+    for prof in levels:
+        for tier, pool in prof.get("pools", {}).items():
+            keep = [seg for seg in pool if clearance_ok(seg)
+                    and (tier == "tall" or window_ms(seg, prof["speed"]) >= MIN_WINDOW_MS)]
+            removed += len(pool) - len(keep)
+            prof["pools"][tier] = keep
+    return removed
 
 
 def apply_whitelist(levels):
@@ -330,6 +382,7 @@ def main():
         results = dict(pool.imap_unordered(build_profile, range(1, PROFILE_LEVELS + 1)))
     levels = [results[i] for i in range(1, PROFILE_LEVELS + 1)]
     apply_whitelist(levels)
+    drop_unfair(levels)
     for i, prof in enumerate(levels, 1):
         sizes = {k: len(v) for k, v in prof["pools"].items()}
         print(f"seviye {i}: hız {prof['speed']}, havada zıplama {prof['air']}, boşluk {prof['gaps']}, havuz {sizes}")
